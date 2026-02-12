@@ -1,0 +1,22 @@
+# Data Handling and Annotations
+numpy
+pandas
+pycocotools
+
+# Image Processing and Visualization
+opencv-python
+matplotlib
+Pillow
+
+# Deep Learning (Core Framework)
+torch
+torchvision
+
+# Backend and API (For Milestone 4)
+fastapi
+uvicorn
+python-multipart
+
+# Utilities
+tqdm
+scikit-learn
