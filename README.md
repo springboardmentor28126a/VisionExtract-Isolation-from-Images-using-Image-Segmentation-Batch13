@@ -1,7 +1,7 @@
 # VisionExtract-Isolation-from-Images-using-Image-Segmentation-Batch13
 
 **************************************************
-Week 1 Update: Getting Hands-on with the Data
+Week 1-2 Update: Getting Hands-on with the Data
 Goal: Tackle the 27GB COCO dataset and make sure I can actually use it.
 
 This week was all about setting up the foundation. I successfully downloaded and extracted the full COCO 2017 dataset locally. Since 27GB is a lot to handle, my priority was ensuring the folder structure was correct and that my Python environment could read the files without crashing.
