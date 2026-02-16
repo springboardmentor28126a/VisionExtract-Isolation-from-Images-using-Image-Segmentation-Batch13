@@ -1,16 +1,82 @@
 # VisionExtract-Isolation-from-Images-using-Image-Segmentation-Batch13
 
 **************************************************
-Week 1-2 Update: Getting Hands-on with the Data
-Goal: Tackle the 27GB COCO dataset and make sure I can actually use it.
+# VisionExtract – Milestone 1
+Subject Isolation using Image Segmentation
+# Project Overview
 
-This week was all about setting up the foundation. I successfully downloaded and extracted the full COCO 2017 dataset locally. Since 27GB is a lot to handle, my priority was ensuring the folder structure was correct and that my Python environment could read the files without crashing.
+VisionExtract is a deep learning-based image segmentation project aimed at automatically isolating the main subject from an image. The output image retains only the subject while the background is rendered completely black.
 
-*Inspecting the Data*
-To verify everything was working, I wrote a script to visualize the "ground truth" for my project.
+This milestone focuses on dataset acquisition, exploration, and preprocessing pipeline development.
 
-Target Subject: "Person" class.
+# Milestone 1 Objectives
 
-The Test: I randomly selected 5 images from the training set and generated their corresponding binary masks.
+Acquire and inspect the COCO 2017 dataset
+Extract images containing the "person" category
+Generate binary segmentation masks
+Build a preprocessing pipeline
+Validate image-mask alignment
+Prepare dataset for training
 
-The Result: I successfully plotted the original images side-by-side with their segmentation masks. The masks accurately capture the pixel-level details of the subjects (people), proving that my pycocotools setup and file paths are working perfectly.
+# Dataset Used
+
+-Dataset Name: COCO 2017
+-Source: Kaggle
+-Category Used: Person
+-Total Images Identified: 64,115
+-The dataset provides:
+Images (train2017)
+Annotation file (instances_train2017.json)
+Polygon segmentation masks
+
+# Technologies Used
+
+-Python
+-TensorFlow
+-NumPy
+-Matplotlib
+-PIL
+-pycocotools
+
+# Dataset Exploration
+
+Retrieved category ID for "person"
+Extracted image IDs containing that category
+Loaded sample images and corresponding masks
+Visualized original images alongside generated binary masks
+
+Mask generation process:
+Converted polygon annotations into binary masks
+Merged multiple person instances into a single mask
+Background = 0
+Subject (Person) = 1
+
+# Preprocessing Pipeline
+
+A TensorFlow tf.data pipeline was implemented for efficient data handling.
+Steps Performed:
+Load image and generate mask using COCO API
+Resize images and masks to 256×256
+Normalize images (0–255 → 0–1)
+Convert masks to binary format
+Batch data (batch size = 16)
+Prefetch for optimized performance
+Output Validation
+
+Pipeline successfully generated:
+Batch Image Shape: (16, 256, 256, 3)
+Batch Mask Shape: (16, 256, 256, 1)
+
+This confirms:
+Correct resizing
+Proper alignment
+Successful batching
+Mask channel correctness
+
+# Milestone 1 Achievements
+
+✔ Dataset acquisition and validation
+✔ Category-specific image filtering
+✔ Binary mask generation
+✔ Efficient tf.data pipeline implementation
+✔ Shape validation and alignment verification
