@@ -1,0 +1,19 @@
+# System artifacts
+__pycache__/
+*.py[cod]
+.DS_Store
+
+# Environments
+venv/
+.env
+.python-version
+
+# Data (Too big for Git)
+data/
+*.zip
+
+documentation
+ipynb_checkpoints
+data/
+*.png
+__pycache__/
