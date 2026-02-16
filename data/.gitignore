@@ -1,0 +1,26 @@
+# --- Datasets and Heavy Data ---
+# Ignore the entire data folder
+data/*
+
+# Do NOT ignore these specific files inside the data folder
+!data/.gitignore
+!data/README.md
+
+# --- Conda Environment Files ---
+.conda/
+conda-meta/
+env/
+venv/
+
+# --- Python & Jupyter Cache ---
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints
+
+# --- VS Code & System Files ---
+.vscode/
+.DS_Store
+
+# --- Model Weights (Week 3/4) ---
+models/*.pth
+models/*.h5
