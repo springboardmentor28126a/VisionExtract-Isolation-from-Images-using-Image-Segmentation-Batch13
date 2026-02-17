@@ -12,15 +12,17 @@ IMAGE_DIR = os.path.join(DATA_DIR, "val2017")
 coco = COCO(ANNOTATION_FILE)
 
 # Get category ID for "person"
-cat_ids = coco.getCatIds(catNms=['person'])
-print("Person Category ID:", cat_ids)
+# cat_ids = coco.getCatIds(catNms=['person'])
+# cat_ids = coco.getCatIds()
+# print("Person Category ID:", cat_ids)
 
-def generate_person_mask(image_id):
+def generate_full_mask(image_id):
     img_info = coco.loadImgs(image_id)[0]
     height = img_info['height']
     width = img_info['width']
 
-    ann_ids = coco.getAnnIds(imgIds=image_id, catIds=cat_ids)
+    # ann_ids = coco.getAnnIds(imgIds=image_id, catIds=cat_ids)
+    ann_ids = coco.getAnnIds(imgIds=image_id)
     anns = coco.loadAnns(ann_ids)
 
     mask = np.zeros((height, width), dtype=np.uint8)

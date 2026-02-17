@@ -1,10 +1,10 @@
 import matplotlib.pyplot as plt
 import cv2
 import os
-from generate_mask import generate_person_mask, IMAGE_DIR
+from generate_mask import generate_full_mask, IMAGE_DIR
 
 def visualize_sample(image_id):
-    mask, filename = generate_person_mask(image_id)
+    mask, filename = generate_full_mask(image_id)
 
     image_path = os.path.join(IMAGE_DIR, filename)
     image = cv2.imread(image_path)
@@ -19,7 +19,7 @@ def visualize_sample(image_id):
 
     plt.subplot(1,2,2)
     plt.imshow(mask, cmap='gray')
-    plt.title("Binary Mask (Person)")
+    plt.title("Binary Mask")
     plt.axis("off")
 
     plt.tight_layout()
@@ -27,4 +27,4 @@ def visualize_sample(image_id):
 
 
 if __name__ == "__main__":
-    visualize_sample(289343)
+    visualize_sample(36678)
