@@ -25,5 +25,3 @@ Week 2:
 - Training set: ~80% images
 - Testing set: ~20% images
 - Purpose: Training the segmentation model and evaluating performance
-
-
