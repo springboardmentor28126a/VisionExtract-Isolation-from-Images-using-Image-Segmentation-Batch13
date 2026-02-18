@@ -3,7 +3,7 @@ import numpy as np
 import cv2
 from pycocotools.coco import COCO
 
-# paths
+
 ANNOTATION_FILE = "annotations/instances_val2017.json"
 IMAGE_DIR = "images/train"
 MASK_DIR = "masks/train"
@@ -35,10 +35,10 @@ for img_id in img_ids:
         ann_mask = coco.annToMask(ann)
         mask = np.maximum(mask, ann_mask)
 
-    # convert to 0 / 255
     mask = (mask * 255).astype(np.uint8)
 
     mask_path = os.path.join(MASK_DIR, file_name.replace(".jpg", ".png"))
     cv2.imwrite(mask_path, mask)
 
-print("✅ Masks generated successfully")
+print("Masks generated successfully")
+
