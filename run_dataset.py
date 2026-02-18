@@ -19,13 +19,11 @@ plt.figure(figsize=(12, 8))
 for i, idx in enumerate(indices):
     image, mask = dataset[idx]
 
-    # Image
     plt.subplot(NUM_SAMPLES // 2, 4, i * 2 + 1)
     plt.imshow(image)
     plt.title(f"Image {idx}", fontsize=10)
     plt.axis("off")
 
-    # Mask
     plt.subplot(NUM_SAMPLES // 2, 4, i * 2 + 2)
     plt.imshow(mask, cmap="gray")
     plt.title(f"Mask {idx}", fontsize=10)
