@@ -14,13 +14,12 @@ class SegmentationDataset:
         images = sorted(os.listdir(image_dir))
         masks = set(os.listdir(mask_dir))
 
-        # ✅ keep only images that have corresponding masks
         self.images = [
             img for img in images
             if img.replace(".jpg", ".png") in masks
         ]
 
-        print(f"✅ Valid image-mask pairs: {len(self.images)}")
+        print(f"Valid image-mask pairs: {len(self.images)}")
 
     def __len__(self):
         return len(self.images)
@@ -43,3 +42,4 @@ class SegmentationDataset:
             mask = np.fliplr(mask)
 
         return image, mask
+
