@@ -1,0 +1,34 @@
+# Virtual Environment
+venv/
+__pycache__/
+
+# Large files
+*.zip
+*.json
+*.pth
+*.pt
+
+# Python cache
+*.pyc
+
+# DLL / LIB
+*.dll
+*.lib
+*.pyd
+# IDE
+.idea/
+.vscode/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Dataset
+data/
+
+# Model checkpoints
+checkpoints/
+*.pth
