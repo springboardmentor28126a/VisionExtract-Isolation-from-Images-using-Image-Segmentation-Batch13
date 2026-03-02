@@ -54,7 +54,141 @@ Selected the following object categories for subject isolation:
 
 ## 📊 Sample Binary Mask Output
 <img width="1320" height="1190" alt="image" src="https://github.com/user-attachments/assets/17b1912e-d1a5-4233-a332-fdad36721008" />
-<img width="1320" height="1190" alt="image" src="https://github.com/user-attachments/assets/17b1912e-d1a5-4233-a332-fdad36721008" />
+---
+
+# 📌 Milestone 2 – Model Training, Evaluation & Fine-Tuning
+
+## 🎯 Objective
+The objective of Milestone 2 was to implement, train, evaluate, and optimize a semantic segmentation model capable of accurately isolating selected subjects (person, animals, fruits) from images.
+
+---
+
+## 🧠 Model Architecture
+
+We implemented **U-Net with a ResNet34 encoder** using `segmentation_models_pytorch`.
+
+```python
+import segmentation_models_pytorch as smp
+
+model = smp.Unet(
+    encoder_name="resnet34",
+    encoder_weights="imagenet",
+    in_channels=3,
+    classes=1
+)
+```
+
+- Encoder: Pretrained ResNet34 (ImageNet)
+- Output: Single-channel binary segmentation mask
+
+---
+
+## ⚙️ Training Configuration
+
+- Loss Function: `BCEWithLogitsLoss`
+- Optimizer: `Adam`
+- Learning Rate: `1e-4`
+- Batch Size: `4`
+- Image Resolution: `256×256`
+- Epochs: 10
+
+```python
+loss_fn = nn.BCEWithLogitsLoss()
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
+```
+
+---
+
+## 🔁 Model Training
+
+The model was trained using forward propagation, loss computation, backpropagation, and optimizer updates.
+
+```python
+for epoch in range(5):
+    model.train()
+    total_loss = 0
+
+    for images, masks in train_loader:
+        images = images.to(device)
+        masks = masks.to(device)
+
+        outputs = model(images)
+        loss = loss_fn(outputs, masks)
+
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        total_loss += loss.item()
+
+    print(f"Epoch {epoch+1}, Loss: {total_loss/len(train_loader)}")
+```
+
+Training loss decreased progressively across epochs, indicating effective learning.
+
+---
+
+## 📊 Model Evaluation – IoU Metric
+
+Performance was evaluated using **Intersection over Union (IoU)** on the validation set.
+
+```python
+def iou_score(pred, target):
+    pred = torch.sigmoid(pred)
+    pred = (pred > 0.5).float()
+
+    intersection = (pred * target).sum(dim=(1,2,3))
+    union = pred.sum(dim=(1,2,3)) + target.sum(dim=(1,2,3)) - intersection
+
+    iou = (intersection + 1e-6) / (union + 1e-6)
+    return iou.mean().item()
+```
+
+Validation Process:
+
+```python
+model.eval()
+total_iou = 0
+
+with torch.no_grad():
+    for images, masks in val_loader:
+        images = images.to(device)
+        masks = masks.to(device)
+
+        outputs = model(images)
+        total_iou += iou_score(outputs, masks)
+
+print("Validation IoU:", total_iou/len(val_loader))
+```
+
+---
+
+## 🖼 Output Generation
+
+The model generates:
+<img width="1320" height="1190" alt="image" src="https://github.com/user-attachments/assets/188f38b2-861b-4249-afb3-ebe1d5de7d35" />
+---
+
+
+## 📈 Results
+
+- Training loss decreased across epochs.
+- The model successfully detected:
+  - Person
+  - Animals
+  - Fruits/Food items
+- Background was removed using predicted segmentation masks.
+- Validation IoU achieved: **(Add your final score here)**
+
+---
+
+## 🚀 Future Improvements
+
+- Combine Dice Loss with BCE Loss
+- Add data augmentation
+- Train for more epochs
+- Improve boundary sharpness
+- Deploy as a web application
 
 ---
 
