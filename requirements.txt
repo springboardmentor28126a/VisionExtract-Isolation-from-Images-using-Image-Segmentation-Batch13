@@ -47,8 +47,8 @@ six==1.17.0
 stringzilla==4.6.0
 sympy==1.14.0
 timm==1.0.25
-torch==2.10.0+cpu
-torchvision==0.25.0+cpu
+torch
+torchvision
 tqdm==4.67.3
 typer==0.24.1
 typer-slim==0.24.0
