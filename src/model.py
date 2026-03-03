@@ -25,8 +25,6 @@ class VisionExtractUNet(nn.Module):
             encoder_weights=encoder_weights,
             in_channels=in_channels,
             classes=classes,
-            # We use a sigmoid activation later in the loss function (BCEWithLogitsLoss) 
-            # for numerical stability, so we don't apply an activation here.
             activation=None 
         )
 
