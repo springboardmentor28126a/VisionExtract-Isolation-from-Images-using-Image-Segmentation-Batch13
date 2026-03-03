@@ -1,134 +1,93 @@
+import os
 import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader
 import segmentation_models_pytorch as smp
 from tqdm import tqdm
-import matplotlib.pyplot as plt
-import numpy as np
 
 # Import our custom modules from the src folder
-from src.dataset import CocoSegmentationDataset, get_training_augmentation
+from src.dataset import CocoSegmentationDataset, get_training_augmentation, get_validation_augmentation
 from src.model import VisionExtractUNet
-
-def visualize_predictions(model, dataset, device, num_samples=2):
-    """
-    Passes a few samples through the model to visualize its early learning.
-    
-    Args:
-        model (torch.nn.Module): The trained neural network.
-        dataset (torch.utils.data.Dataset): The dataset to pull samples from.
-        device (torch.device): CPU or CUDA.
-        num_samples (int): How many images to visualize.
-    """
-    model.eval() # Set model to evaluation mode
-    fig, axes = plt.subplots(num_samples, 3, figsize=(15, 5 * num_samples))
-    
-    with torch.no_grad(): # No gradients needed for inference
-        for i in range(num_samples):
-            # Get data
-            image_tensor, true_mask = dataset[i]
-            
-            # Add batch dimension and move to device: (C, H, W) -> (1, C, H, W)
-            input_tensor = image_tensor.unsqueeze(0).to(device)
-            
-            # Predict
-            raw_logits = model(input_tensor)
-            
-            # Apply Sigmoid to convert logits to probabilities (0.0 to 1.0)
-            prob_mask = torch.sigmoid(raw_logits)
-            
-            # Threshold to make it strictly binary (1 or 0)
-            pred_mask = (prob_mask > 0.5).float()
-            
-            # Convert tensors back to numpy for matplotlib
-            vis_img = image_tensor.permute(1, 2, 0).numpy()
-            
-            # Reverse ImageNet normalization for visualization
-            mean = np.array([0.485, 0.456, 0.406])
-            std = np.array([0.229, 0.224, 0.225])
-            vis_img = std * vis_img + mean
-            vis_img = np.clip(vis_img, 0, 1)
-            
-            # Plot Original Image
-            axes[i, 0].imshow(vis_img)
-            axes[i, 0].set_title("Input Image")
-            axes[i, 0].axis('off')
-            
-            # Plot Ground Truth
-            axes[i, 1].imshow(true_mask.squeeze().numpy(), cmap='gray')
-            axes[i, 1].set_title("Ground Truth Mask")
-            axes[i, 1].axis('off')
-            
-            # Plot Prediction
-            axes[i, 2].imshow(pred_mask.squeeze().cpu().numpy(), cmap='gray')
-            axes[i, 2].set_title("Model Prediction")
-            axes[i, 2].axis('off')
-            
-    plt.tight_layout()
-    plt.show()
 
 def train_model():
     """
-    Executes the training pipeline for the U-Net model using Dice Loss.
-    Initializes loaders, model, optimizer, and runs the epoch loop.
+    Executes the full training and validation pipeline.
+    Saves the best model weights based on validation Dice Loss.
     """
-    # 1. Setup Device (Will use CPU since you are local, but ready for Colab GPU)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Training on device: {device}")
 
-    # 2. Data Setup
-    # Using a tiny batch size (2 or 4) to prevent CPU RAM overload locally
-    dataset = CocoSegmentationDataset(
-        root_dir='data/raw', 
-        subset='val2017', 
-        transform=get_training_augmentation()
+    # 1. Data Setup (Now with Training and Validation sets)
+    # Using larger batch sizes for GPU
+    batch_size = 16 if torch.cuda.is_available() else 2
+    
+    train_dataset = CocoSegmentationDataset(
+        root_dir='data/raw', subset='train2017', transform=get_training_augmentation()
     )
-    dataloader = DataLoader(dataset, batch_size=2, shuffle=True, num_workers=0)
+    val_dataset = CocoSegmentationDataset(
+        root_dir='data/raw', subset='val2017', transform=get_validation_augmentation()
+    )
+    
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=2)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=2)
 
-    # 3. Model Setup
+    # 2. Model Setup
     model = VisionExtractUNet().to(device)
 
-    # 4. Loss and Optimizer
-    # We use mode='binary' and from_logits=True so we don't need to change model.py
+    # 3. Loss and Optimizer
     criterion = smp.losses.DiceLoss(mode='binary', from_logits=True)
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    # Hyperparameter tuning: slightly lower learning rate for stable convergence
+    optimizer = optim.Adam(model.parameters(), lr=0.0005) 
 
-    # 5. Training Loop
-    epochs = 3
+    # 4. Training & Validation Loop
+    epochs = 10 # Let's train for 10 epochs on the GPU
+    best_val_loss = float('inf')
+    os.makedirs('checkpoints', exist_ok=True)
+
     print(f"\nStarting training for {epochs} epochs...")
 
     for epoch in range(epochs):
+        # --- TRAIN PHASE ---
         model.train()
-        running_loss = 0.0
+        train_loss = 0.0
+        train_bar = tqdm(train_loader, desc=f"Epoch {epoch+1}/{epochs} [Train]")
         
-        # tqdm gives us a nice progress bar in the CLI
-        bar = tqdm(dataloader, desc=f"Epoch {epoch+1}/{epochs}")
-        for images, masks in bar:
-            images = images.to(device)
-            masks = masks.to(device)
-
-            # Zero gradients
+        for images, masks in train_bar:
+            images, masks = images.to(device), masks.to(device)
             optimizer.zero_grad()
-
-            # Forward pass
             outputs = model(images)
-            
-            # Calculate Dice Loss
             loss = criterion(outputs, masks)
-            
-            # Backward pass and optimize
             loss.backward()
             optimizer.step()
+            
+            train_loss += loss.item()
+            train_bar.set_postfix({"Loss": f"{loss.item():.4f}"})
+            
+        avg_train_loss = train_loss / len(train_loader)
 
-            # Update metrics
-            running_loss += loss.item()
-            bar.set_postfix({"Dice Loss": f"{loss.item():.4f}"})
+        # --- VALIDATION PHASE ---
+        model.eval()
+        val_loss = 0.0
+        val_bar = tqdm(val_loader, desc=f"Epoch {epoch+1}/{epochs} [Val]")
+        
+        with torch.no_grad():
+            for images, masks in val_bar:
+                images, masks = images.to(device), masks.to(device)
+                outputs = model(images)
+                loss = criterion(outputs, masks)
+                val_loss += loss.item()
+                val_bar.set_postfix({"Loss": f"{loss.item():.4f}"})
+                
+        avg_val_loss = val_loss / len(val_loader)
+        
+        print(f"Epoch {epoch+1} Summary | Train Loss: {avg_train_loss:.4f} | Val Loss: {avg_val_loss:.4f}")
 
-        epoch_loss = running_loss / len(dataloader)
-        print(f"Epoch {epoch+1} Complete | Average Dice Loss: {epoch_loss:.4f}")
-
-    print("\nTraining complete! Visualizing results after 3 epochs...")
-    visualize_predictions(model, dataset, device)
+        # Checkpoint Saving: Save the model if validation loss improves
+        if avg_val_loss < best_val_loss:
+            best_val_loss = avg_val_loss
+            save_path = 'checkpoints/best_model.pth'
+            torch.save(model.state_dict(), save_path)
+            print(f"--> Validation loss improved! Saved model to {save_path}")
 
 if __name__ == "__main__":
     train_model()
