@@ -80,3 +80,92 @@ Mask channel correctness
 ✔ Binary mask generation
 ✔ Efficient tf.data pipeline implementation
 ✔ Shape validation and alignment verification
+
+
+
+
+---------------------------------------------------------------------
+
+# Milestone 2 Objectives
+Split the dataset into formal training, validation, and testing sets
+
+Build a memory-efficient custom data generator for batch processing
+
+Implement a U-Net architecture (Encoder/Decoder network)
+
+Execute baseline model training and monitor loss metrics
+
+Evaluate predictions mathematically using Intersection over Union (IoU)
+
+Implement data augmentation and fine-tune the model for higher accuracy
+
+Visualize and validate final predicted masks against ground truth
+
+# Dataset Used
+Subset Used: 5,000 images from COCO val2017
+
+Split Strategy:
+
+70% Training (3,500 images)
+
+15% Validation (750 images)
+
+15% Testing (750 images)
+
+Image/Mask Dimensions: Resized to 128×128
+
+Normalization: RGB values scaled from 0–255 to 0–1
+
+# Technologies Used
+Python
+
+TensorFlow / Keras
+
+OpenCV (cv2)
+
+NumPy
+
+Matplotlib
+
+pycocotools
+
+# Model Architecture (U-Net)
+A lightweight U-Net architecture was built from scratch using tf.keras:
+
+Encoder (Downsampling): Utilizes Conv2D and MaxPooling2D layers to shrink the image and extract core features (learning what the subject is).
+
+Bottleneck: The deepest layer holding the most compressed feature representations.
+
+Decoder (Upsampling): Utilizes UpSampling2D and skip connections (layers.concatenate) to reconstruct the spatial dimensions (learning where the subject is).
+
+Output Layer: A Conv2D layer with a Sigmoid activation function to generate a 1-channel probability map for the binary mask.
+
+Training Pipeline & Fine-Tuning
+A custom tf.keras.utils.Sequence generator was implemented to load images from the hard drive in batches of 16, preventing RAM overflow.
+
+# Phase 1: Baseline Training (Week 3)
+
+Optimizer: Adam (Standard learning rate)
+
+Loss Function: Binary Cross-Entropy
+
+Epochs: 5
+
+Result: Training and Validation loss decreased simultaneously, confirming healthy learning without overfitting.
+
+# Phase 2: Fine-Tuning (Week 4)
+
+Data Augmentation: Added RandomFlip and RandomRotation (10%) to the training pipeline to make the model robust to different orientations.
+
+Optimizer: Adam (Lowered learning rate to 1e-4)
+
+Epochs: 10
+
+Result: Locked in optimized weights and saved the final model as final_segmentation_model.keras.
+
+# Output Validation
+Pipeline successfully verified model intelligence through two methods:
+
+Visual Verification: Matplotlib scripts successfully generated side-by-side comparisons of the Original RGB Image, the True Ground-Truth Mask, and the Model's Predicted Mask.
+
+Mathematical Verification: Implemented a custom Intersection over Union (IoU) function to mathematically score the exact pixel overlap between predictions and true masks.
