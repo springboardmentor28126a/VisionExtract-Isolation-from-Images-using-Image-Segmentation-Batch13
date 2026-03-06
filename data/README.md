@@ -38,13 +38,19 @@ VISIONEXTRACT/
 │           ├── *_mask.png
 │           └── *_isolated.jpg
 │
+├── models/
+│   └── vision_extract_best.keras
+│   └── vision_extract_fine_tuning.keras
 ├── notebooks/
-│   └── dataset_exploration.ipynb # EDA and mask inspection
+│   └── dataset_exploration.ipynb 
 ├── requirements/  
-│    └── requirements.txt         # Python dependencies
+│   └── requirements.txt         # Python dependencies
 ├── src/
-│   └── split_dataset.py         # Logic for 70/15/15 data partitioning
-└── .gitignore                   # Files ignored by Git
+│   └── split_dataset.py          # Logic for 70/15/15 data partitioning
+│   └── model.py 
+│   └── utils.py 
+│   └── utils1.py 
+└── .gitignore                    # Files ignored by Git
 
 ✅ Milestone 1: 
 Progress Summary
@@ -74,3 +80,59 @@ Dataset successfully loaded and inspected.
 Binary segmentation masks generated.
 Preprocessing pipeline established (Resize, Normalize, Augment).
 Subject isolation logic verified.
+
+
+✅ Milestone 2: 
+VisionExtract: Isolation from Images using Image Segmentation
+VisionExtract is a deep learning system designed for precise subject isolation. By utilizing a custom-built U-Net architecture, the model learns to generate binary masks that separate foreground subjects from complex backgrounds, specifically optimized using the COCO 2017 dataset(val2017).
+
+
+🏗 Model Architecture (model.py)
+The model is a deep Convolutional Neural Network (CNN) based on the U-Net design, optimized for a 256 x 256 input resolution.
+Encoder: 4 levels of double convolutions, batch normalization, and max-pooling to extract hierarchical features.
+Bottleneck: The deepest layer (16, 16, 1024) captures abstract global context.
+Decoder: Uses Transposed Convolutions and Skip Connections to recover spatial resolution for pixel-perfect masks.
+Final Layer: 1 x 1 Convolution with Sigmoid activation for binary segmentation.
+
+
+🎲 Dice Loss
+Definition: Dice Loss is a loss function based on the Sørensen–Dice coefficient, which is a statistic used to gauge the similarity of two samples. In image segmentation, it measures the overlap between two samples by taking twice the area of overlap and dividing it by the sum of the total number of pixels in both masks.
+
+🏗️ Intersection over Union (IoU)
+Definition: Intersection over Union (also known as the Jaccard Index) is a metric used to measure the accuracy of an object detector or segmentation model on a particular dataset. It calculates the ratio between the area of overlap and the area of union between the predicted segmentation map and the ground truth mask.
+
+
+📊 Training Strategy
+
+1.Initial Training (utils.py)
+Focused on basic convergence using normalized image-mask pairs.
+Optimizer: Adam (LR = 1e-4)
+Batch Size: 16
+Epochs: 15
+Validation Result: Accuracy ~80%, Mean IoU ~0.35, Dice Loss ~0.32.
+
+2.Fine-Tuning with Augmentation (utils1.py)
+To improve robustness, we introduced a second phase with a lower learning rate and dynamic data augmentation.
+Optimizer: Adam (LR = 1e-5)
+Batch Size: 16
+Epochs: 5
+Augmentations: Brightness shifts and Horizontal flips.
+Metrics: Added Class-Specific IoU (bg_iou and subject_iou).
+
+Final Validation Result
+Accuracy 78.02%
+Subject IoU 50.85%
+Background IoU 71.41%
+Mean IOU 61.13%
+Dice Loss 0.3301
+
+
+🖼 Outcomes
+The model successfully isolates subjects even in images with overlapping elements. The fine-tuning phase significantly improved the model's ability to "see" smaller subjects.
+
+
+🛠 Tech Stack
+Core: Python, TensorFlow, Keras
+Processing: OpenCV, NumPy
+Visualization: Matplotlib
+Dataset: COCO 2017 (val2017)
