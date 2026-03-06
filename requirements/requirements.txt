@@ -1,6 +1,9 @@
 numpy
 opencv-python
+tensorflow
 matplotlib
 pycocotools
 jupyter
 tqdm
+Pillow
+scikit-learn
