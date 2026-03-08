@@ -25,6 +25,6 @@ class UNet(nn.Module):
         x = self.enc1(x)
         return torch.sigmoid(self.final(x))
 
-# ✅ proof
+#  proof
 model = UNet()
 print(model)
