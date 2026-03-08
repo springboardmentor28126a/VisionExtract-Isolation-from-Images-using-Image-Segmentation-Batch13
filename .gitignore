@@ -1,0 +1,5 @@
+val2017/
+train2017/
+annotations/
+*.pth
+__pycache__/
