@@ -2,14 +2,10 @@ import os
 import random
 import shutil
 
-# ==============================
-# 🔹 CHANGE THESE PATHS ONLY
-# ==============================
 
 source_folder = "C:/Users/varsh/Downloads/archive/coco2017/val2017"
 destination_folder = "C:/Users/varsh/Downloads/archive/coco2017/split_data"
 
-# ==============================
 
 # Create destination folders
 train_folder = os.path.join(destination_folder, "train")
