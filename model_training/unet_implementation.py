@@ -271,4 +271,4 @@ with torch.no_grad():
     plt.savefig("milestone2_proof/final_result.png")
     plt.close()
 
-print("One proof image with isolation saved!")
+print("one proof Image with  isolation saved!")
