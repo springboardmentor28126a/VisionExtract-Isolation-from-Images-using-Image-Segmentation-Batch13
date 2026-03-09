@@ -134,7 +134,7 @@ Measures the percentage of correctly classified pixels.
 Higher values indicate better segmentation performance.
 
 ----
-
+```
 Project Directory Structure
 
 VisionExtract_Segmentation
@@ -167,6 +167,7 @@ VisionExtract_Segmentation
 |   |──training_output.png
 |
 └── README.md
+```
 
 
 
