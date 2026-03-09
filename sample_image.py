@@ -1,22 +1,62 @@
-# sample_image.py
+import torch
+from torch.utils.data import DataLoader
+import torchvision.transforms as T
+import matplotlib.pyplot as plt
 
-from Data_Preprocessing.preprocessing import preprocess_image
-from Data_Preprocessing.img_viz import show_image
-import cv2
+from dataset import CocoSubjectDataset
 
-image_path = "data/data/coco2017/train2017/000000001497.jpg"
+# ----------------------------
+# Transform (same for image & mask)
+# ----------------------------
+transform = T.Compose([
+    T.Resize((256, 256)),
+    T.ToTensor()
+])
 
+# ----------------------------
+# Dataset
+# ----------------------------
+dataset = CocoSubjectDataset(
+    image_dir="data/data/coco2017/train2017",
+    annotation_file="data/data/coco2017/annotations/instances_train2017.json",
+    transform=transform
+)
 
-image = preprocess_image(image_path)
+print("Total images:", len(dataset))
 
-# Convert back to 0-255 for visualization
-image_display = (image * 255).astype("uint8")
+# ----------------------------
+# DataLoader
+# ----------------------------
+loader = DataLoader(
+    dataset,
+    batch_size=8,
+    shuffle=True
+)
 
-show_image(image_display, "Preprocessed Image")
+# ----------------------------
+# Fetch one sample
+# ----------------------------
+image, mask = next(iter(loader))
 
+print("Image shape:", image.shape)   # [1, 3, 256, 256]
+print("Mask shape:", mask.shape)     # [1, 1, 256, 256]
 
+# ----------------------------
+# Visualization
+# ----------------------------
+img = image[0].permute(1, 2, 0)
+msk = mask[0].squeeze()
 
+plt.figure(figsize=(8,4))
 
+plt.subplot(1,2,1)
+plt.imshow(img)
+plt.title("Input Image")
+plt.axis("off")
 
+plt.subplot(1,2,2)
+plt.imshow(msk, cmap="gray")
+plt.title("Subject Mask")
+plt.axis("off")
 
-
+plt.show()

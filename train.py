@@ -16,7 +16,7 @@ print("Using device:", device)
 # Transform (Reduced Size for CPU)
 # -----------------------------
 transform = T.Compose([
-    T.Resize((128, 128)),   # Smaller image = faster training
+    T.Resize((256, 256)),   
     T.ToTensor(),
 ])
 
@@ -34,7 +34,7 @@ print("Total images in dataset:", len(dataset))
 # -----------------------------
 # Use Small Subset (Fast Debug)
 # -----------------------------
-subset_size = 50
+subset_size = 5000
 dataset = torch.utils.data.Subset(dataset, range(subset_size))
 
 print("Using subset size:", subset_size)
@@ -42,7 +42,7 @@ print("Using subset size:", subset_size)
 # -----------------------------
 # DataLoader
 # -----------------------------
-loader = DataLoader(dataset, batch_size=1, shuffle=True)
+loader = DataLoader(dataset, batch_size=4, shuffle=True)
 
 # -----------------------------
 # Model
@@ -58,7 +58,7 @@ optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
 # -----------------------------
 # Training Loop
 # -----------------------------
-num_epochs = 1
+num_epochs = 8
 
 for epoch in range(num_epochs):
     print(f"\nStarting Epoch {epoch+1}/{num_epochs}")

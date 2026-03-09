@@ -1,5 +1,4 @@
 import torch
-import torch.nn as nn
 from torch.utils.data import DataLoader
 import torchvision.transforms as T
 import matplotlib.pyplot as plt
@@ -20,7 +19,7 @@ print("Using device:", device)
 # Transform (same as training)
 # -----------------------------
 transform = T.Compose([
-    T.Resize((128, 128)),
+    T.Resize((256, 256)),
     T.ToTensor(),
 ])
 
@@ -33,9 +32,8 @@ dataset = CocoSubjectDataset(
     transform=transform
 )
 
-subset_size = 20
+subset_size = 1000
 dataset = torch.utils.data.Subset(dataset, range(subset_size))
-
 loader = DataLoader(dataset, batch_size=1, shuffle=False)
 
 # -----------------------------
@@ -59,8 +57,10 @@ def iou_score(pred, target):
 
 
 def dice_score(pred, target):
-    intersection = (pred * target).sum()
-    return (2. * intersection + 1e-6) / (pred.sum() + target.sum() + 1e-6)
+    pred = pred.bool()
+    target = target.bool()
+    intersection = (pred & target).float().sum()
+    return (2. * intersection + 1e-6) / (pred.float().sum() + target.float().sum() + 1e-6)
 
 
 def pixel_accuracy(pred, target):
@@ -90,33 +90,34 @@ with torch.no_grad():
         probs = torch.sigmoid(outputs)
         preds = (probs > 0.5).float()
 
-        # Metrics
-        total_iou += iou_score(preds, masks)
-        total_dice += dice_score(preds, masks)
-        total_acc += pixel_accuracy(preds, masks)
+        # Metrics (convert to float values)
+        total_iou += iou_score(preds, masks).item()
+        total_dice += dice_score(preds, masks).item()
+        total_acc += pixel_accuracy(preds, masks).item()
         count += 1
 
-        # Convert to numpy for visualization
-        image_np = images[0].cpu().permute(1,2,0).numpy()
+        # Convert to numpy
+        image_np = images[0].cpu().permute(1, 2, 0).numpy()
         mask_np = preds[0].cpu().squeeze().numpy()
 
         # Subject isolation (background black)
-        isolated = image_np * np.expand_dims(mask_np, axis=-1)
+        isolated = image_np.copy()
+        isolated[mask_np == 0] = 0
 
-        # Save image
-        plt.figure(figsize=(8,3))
+        # Save visualization
+        plt.figure(figsize=(8, 3))
 
-        plt.subplot(1,3,1)
+        plt.subplot(1, 3, 1)
         plt.title("Input")
         plt.imshow(image_np)
         plt.axis("off")
 
-        plt.subplot(1,3,2)
+        plt.subplot(1, 3, 2)
         plt.title("Pred Mask")
         plt.imshow(mask_np, cmap="gray")
         plt.axis("off")
 
-        plt.subplot(1,3,3)
+        plt.subplot(1, 3, 3)
         plt.title("Isolated")
         plt.imshow(isolated)
         plt.axis("off")
@@ -130,6 +131,6 @@ with torch.no_grad():
 # Final Metrics
 # -----------------------------
 print("\nValidation Results:")
-print("IoU:", (total_iou / count).item())
-print("Dice:", (total_dice / count).item())
-print("Pixel Accuracy:", (total_acc / count).item())
+print("IoU:", total_iou / count)
+print("Dice:", total_dice / count)
+print("Pixel Accuracy:", total_acc / count)
