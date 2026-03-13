@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import cv2
 import os
-from generate_mask import generate_full_mask, IMAGE_DIR
+from generate_mask_main_subject import generate_full_mask, IMAGE_DIR
 
 def visualize_sample(image_id):
     mask, filename = generate_full_mask(image_id)
