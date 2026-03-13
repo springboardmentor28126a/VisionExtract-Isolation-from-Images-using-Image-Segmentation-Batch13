@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 # Import our custom modules from the src folder
 from src.dataset import CocoSegmentationDataset, get_training_augmentation, get_validation_augmentation
-from src.model import VisionExtractUNet
+from src.model import VisionExtractModel
 
 def train_model():
     """
@@ -31,9 +31,8 @@ def train_model():
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=2)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=2)
 
-    # 2. Model Setup
-    model = VisionExtractUNet().to(device)
-
+    # 2. Model Setup: Week 5 FPN Challenger
+    model = VisionExtractModel(arch="fpn", encoder_name="resnet34").to(device)
     # 3. Loss and Optimizer
     criterion = smp.losses.DiceLoss(mode='binary', from_logits=True)
     # Hyperparameter tuning: slightly lower learning rate for stable convergence
@@ -85,7 +84,7 @@ def train_model():
         # Checkpoint Saving: Save the model if validation loss improves
         if avg_val_loss < best_val_loss:
             best_val_loss = avg_val_loss
-            save_path = 'checkpoints/best_model.pth'
+            save_path = 'checkpoints/best_model_fpn.pth'
             torch.save(model.state_dict(), save_path)
             print(f"--> Validation loss improved! Saved model to {save_path}")
 
