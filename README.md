@@ -1,12 +1,12 @@
-VisionExtract
-Binary Semantic Segmentation for Background Removal
- Overview
+#VisionExtract
+#Binary Semantic Segmentation for Background Removal
+## Overview
 
 VisionExtract is a deep learning-based computer vision project that performs binary semantic segmentation to isolate the main subject (Person) from an image and remove the background.
 
 The system uses the COCO val2017 dataset and converts polygon annotations into binary masks for supervised training.
 
-Project Goal
+##Project Goal
 
 The objective of this project is to:
 
