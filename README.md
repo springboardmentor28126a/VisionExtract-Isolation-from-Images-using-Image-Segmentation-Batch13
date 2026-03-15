@@ -1,164 +1,345 @@
-#VisionExtract
-#Binary Semantic Segmentation for Background Removal
-## Overview
+#  VisionExtract
 
-VisionExtract is a deep learning-based computer vision project that performs binary semantic segmentation to isolate the main subject (Person) from an image and remove the background.
+## Subject Isolation from Images using Deep Learning Segmentation
 
-The system uses the COCO val2017 dataset and converts polygon annotations into binary masks for supervised training.
+VisionExtract is a **computer vision deep learning project** that performs **binary semantic segmentation** to isolate the main subject (person) from an image.
 
-##Project Goal
+The system processes an input image and generates a **binary mask** to separate the subject from the background.
 
-The objective of this project is to:
+The project follows a structured deep learning workflow across **three milestones:**
 
-Take an RGB image as input
+* Dataset Preparation
+* Model Training & Evaluation
+* Model Improvement & Inference Deployment
 
-Identify the main subject (Person category)
+---
 
-Generate a binary segmentation mask
+#  Project Objective
 
-Enable background removal
+The main objective is to build an AI system that:
 
-Project Type
+* Takes an RGB image as input
+* Identifies the main subject (person)
+* Generates a binary segmentation mask
+* Removes background automatically
+* Produces subject-isolated output images
 
-This project belongs to:
+---
 
-Computer Vision
+#  Project Pipeline
 
-Supervised Learning
+```text
+COCO Dataset + Annotations
+        ↓
+Polygon → Binary Mask Conversion
+        ↓
+Preprocessing Pipeline
+        ↓
+Train / Validation / Test Split
+        ↓
+U-Net Segmentation Training
+        ↓
+Evaluation using IoU Metric
+        ↓
+Model Improvement & Architecture Experiments
+        ↓
+Inference Pipeline for New Images
+        ↓
+Subject Extraction Output
+```
 
-Binary Semantic Segmentation
+---
 
-Deep Learning (CNN-based approach)
+#  Tech Stack
 
-Dataset Used
+* Python
+* PyTorch
+* segmentation-models-pytorch
+* NumPy
+* OpenCV
+* Matplotlib
+* COCO Dataset
 
-The project uses:
+---
 
-COCO val2017 Dataset
+#  Dataset
 
-Dataset Components:
+The project uses a subset of the **COCO val2017 dataset**.
 
-val2017/ → 5000 images
+Dataset structure:
 
-instances_val2017.json → Segmentation annotations
+```text
+val2017/
+   ├── image1.jpg
+   ├── image2.jpg
+   └── ...
 
-Only the Person category is used to convert the task into binary segmentation.
+annotations/
+   └── instances_val2017.json
+```
 
- Dataset Processing
+COCO provides **polygon annotations**, which were converted into **binary masks**:
 
-COCO provides segmentation data as polygon annotations, not mask images.
+* Person → 1
+* Background → 0
 
-Steps performed:
+---
 
-Loaded annotation JSON file
+#  Milestone 1 – Dataset Preparation
 
-Filtered images containing the Person category
+Milestone 1 focused on building a **clean and structured data pipeline** for segmentation training.
 
-Converted polygon annotations into binary masks using pycocotools
+### Tasks Completed
 
-Verified mask correctness through visualization
+* Defined segmentation problem and expected output
+* Downloaded COCO dataset
+* Filtered Person category for binary segmentation
+* Converted polygon annotations into pixel-level binary masks
+* Built preprocessing pipeline (resize, normalize, tensor conversion)
+* Verified image-mask alignment visually
+* Split dataset into Train / Validation / Test (70 / 15 / 15)
+* Implemented custom Dataset and DataLoader classes
 
-Binary mask format:
+### Outcomes
 
-1 → Person
+* Model-ready segmentation dataset created
+* Clean binary masks generated
+* Efficient batch data loading pipeline established
 
-0 → Background
+---
 
-Data Preprocessing
+#  Milestone 2 – Model Training & Evaluation
 
-To prepare data for training, the following preprocessing steps were implemented:
+Milestone 2 focused on implementing and training the segmentation model.
 
-✔ Image Resizing
+---
 
-All images and masks were resized to:
+##  Model Architecture
 
-256 × 256
+The project uses **U-Net**, a CNN designed specifically for image segmentation.
 
+Architecture features:
 
-This ensures consistent input size for neural networks.
+* Encoder-decoder structure
+* Skip connections to preserve spatial information
+* Pixel-wise mask prediction
 
-✔ Normalization
+Encoder used:
 
-Images were normalized using ImageNet mean and standard deviation to improve training stability and compatibility with pretrained encoders.
+**ResNet34 pretrained on ImageNet**
 
-✔ Binary Conversion
+Benefits:
 
-Multi-class segmentation annotations were simplified into binary segmentation:
+* Faster learning
+* Better feature extraction
+* Improved segmentation quality
 
-Person pixels → 1
+---
 
-All other pixels → 0
+##  Loss Function
 
-✔ Dataset Splitting
+Binary segmentation requires pixel-wise comparison.
 
-The dataset was shuffled and split into:
+Loss used:
 
-70% → Training
+**Binary Cross Entropy with Logits Loss**
 
-15% → Validation
+This measures the difference between predicted masks and ground truth masks.
 
-15% → Testing
+---
 
-This ensures proper model evaluation and prevents data leakage.
+##  Optimizer
 
- Data Pipeline
+**Adam Optimizer**
 
-The project includes:
+Advantages:
 
-Custom PyTorch Dataset class
+* Adaptive learning rate
+* Stable convergence
+* Effective gradient updates
 
-DataLoader pipeline
+---
 
-Mask generation function
+##  Model Evaluation
 
-Preprocessing transformations
+Segmentation performance measured using **Intersection over Union (IoU)**.
 
-Structured train/validation/test splits
+Formula:
 
-The dataset is fully model-ready.
+```text
+IoU = Intersection / Union
+```
 
- Technologies Used
+Where:
 
-Python
+* Intersection → overlap between predicted and true mask
+* Union → total combined area
 
-PyTorch
+Higher IoU indicates better segmentation.
 
-Torchvision
+---
 
-NumPy
+##  Prediction Visualization
 
-Matplotlib
+Model predictions were visually compared with ground truth masks:
 
-pycocotools
+* Original image
+* Ground truth mask
+* Predicted mask
 
-Current Status
+This qualitative validation ensured proper subject extraction.
 
-✔ Dataset acquisition completed
-✔ Polygon-to-mask conversion implemented
-✔ Preprocessing pipeline created
-✔ Dataset splitting completed
-✔ DataLoader ready
+---
 
-Next step:
+##  Hyperparameter Tuning
 
-Implement U-Net model
+Model performance improved by adjusting:
 
-Train segmentation model
+* Learning rate
+* Batch size
+* Number of epochs
 
-Evaluate using IoU and Dice metrics
+---
 
- Key Learnings
+##  Data Augmentation
 
-Understanding COCO annotation structure
+Applied:
 
-Converting polygon annotations to masks
+* Random horizontal flip
+* Random rotation
 
-Building a clean preprocessing pipeline
+Benefits:
 
-Handling binary segmentation tasks
+* Prevents overfitting
+* Improves generalization
+* Helps model handle varied subject orientations
 
-Preventing data leakage through proper splitting
+---
 
-🏁 Conclusion
+## Outcomes of Milestone 2
 
-VisionExtract establishes a structured data engineering pipeline for binary semantic segmentation. The dataset is prepared and validated for deep learning-based training and evaluation.
+* Working segmentation model trained
+* Loss monitored and reduced
+* IoU metric calculated
+* Visual segmentation validation completed
+* Performance improved through tuning
+
+---
+
+#  Milestone 3 – Model Improvement & Inference Deployment
+
+Milestone 3 focused on **enhancing segmentation quality and deploying the trained model for real-world inference.**
+
+---
+
+##  Improved Data Processing
+
+Advanced augmentation techniques added:
+
+* Vertical flip
+* Color jitter
+* Stronger rotation
+
+This increased dataset diversity and improved model robustness.
+
+---
+
+##  Mask Post-Processing
+
+Morphological operations applied to predicted masks:
+
+* Closing → fills holes
+* Opening → removes noise
+
+Result:
+
+Cleaner subject boundaries and improved visual output.
+
+---
+
+##  Architecture Experimentation
+
+Multiple segmentation architectures were tested:
+
+* U-Net + ResNet34
+* U-Net + ResNet50
+* DeepLabV3+
+
+Performance comparison conducted based on:
+
+* IoU score
+* Training speed
+* Mask sharpness
+
+This experimentation helped identify the best performing model.
+
+---
+
+##  Inference Pipeline
+
+A complete inference system was developed to process **new unseen images.**
+
+Pipeline steps:
+
+1. Load trained model weights
+2. Apply same preprocessing
+3. Predict segmentation mask
+4. Apply thresholding
+5. Extract subject by removing background
+6. Save final output image
+
+This enables automated subject isolation.
+
+---
+
+##  Robustness Testing
+
+Model tested on:
+
+* Internet images
+* Personal photos
+* Different lighting conditions
+* Different poses
+
+This validated model generalization beyond training data.
+
+---
+
+## Outcomes of Milestone 3
+
+* Improved segmentation accuracy
+* Cleaner masks through post-processing
+* Multiple architectures evaluated
+* Automated inference pipeline built
+* Subject extraction working on unseen images
+
+---
+
+#  Final Result
+
+The VisionExtract system successfully performs:
+
+* Binary semantic segmentation
+* Subject isolation
+* Background removal
+* Automated inference on new images
+
+This project demonstrates a **complete deep learning lifecycle:**
+
+Data Engineering → Model Training → Model Optimization → Deployment Pipeline
+
+---
+
+#  Future Improvements
+
+* Multi-class segmentation
+* Higher resolution training
+* Real-time video segmentation
+* Web app deployment
+* Mobile inference optimization
+
+---
+
+# 👩‍💻 Author
+
+**Jafina Zeenath**
