@@ -38,7 +38,7 @@ def train_model():
     optimizer = optim.Adam(model.parameters(), lr=0.001) 
     
     # Dynamically reduce LR by half if Val Loss plateaus for 2 epochs
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=2, factor=0.5, verbose=True)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=2, factor=0.5)
 
     # 4. Training & Validation Loop
     epochs = 20 # train for 20 epochs on the GPU
