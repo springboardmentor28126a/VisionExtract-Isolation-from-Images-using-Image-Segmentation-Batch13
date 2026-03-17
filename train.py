@@ -31,15 +31,17 @@ def train_model():
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=2)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=2)
 
-    # 2. Model Setup: Week 5 FPN Challenger
-    model = VisionExtractModel(arch="fpn", encoder_name="resnet34").to(device)
-    # 3. Loss and Optimizer
+    # 2. Model Setup: Ultimate Run Configuration
+    model = VisionExtractModel(arch="unetplusplus", encoder_name="efficientnet-b3").to(device)
+    # 3. Loss, Optimizer, and Scheduler
     criterion = smp.losses.DiceLoss(mode='binary', from_logits=True)
-    # Hyperparameter tuning: slightly lower learning rate for stable convergence
-    optimizer = optim.Adam(model.parameters(), lr=0.0005) 
+    optimizer = optim.Adam(model.parameters(), lr=0.001) 
+    
+    # Dynamically reduce LR by half if Val Loss plateaus for 2 epochs
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=2, factor=0.5, verbose=True)
 
     # 4. Training & Validation Loop
-    epochs = 10 # Let's train for 10 epochs on the GPU
+    epochs = 20 # train for 20 epochs on the GPU
     best_val_loss = float('inf')
     os.makedirs('checkpoints', exist_ok=True)
 
@@ -80,11 +82,15 @@ def train_model():
         avg_val_loss = val_loss / len(val_loader)
         
         print(f"Epoch {epoch+1} Summary | Train Loss: {avg_train_loss:.4f} | Val Loss: {avg_val_loss:.4f}")
+        
+        # ADD THIS LINE: Step the scheduler based on validation loss
+        scheduler.step(avg_val_loss)
 
+        
         # Checkpoint Saving: Save the model if validation loss improves
         if avg_val_loss < best_val_loss:
             best_val_loss = avg_val_loss
-            save_path = 'checkpoints/best_model_fpn.pth'
+            save_path = 'checkpoints/best_model_unetplusplus_effb3.pth'
             torch.save(model.state_dict(), save_path)
             print(f"--> Validation loss improved! Saved model to {save_path}")
 

@@ -33,6 +33,12 @@ class VisionExtractModel(nn.Module):
                 encoder_name=encoder_name, encoder_weights=encoder_weights,
                 in_channels=in_channels, classes=classes, activation=None
             )
+        elif self.arch == "unetplusplus":
+            # UNet++: Densely connected skip pathways for ultra-sharp boundaries
+            self.model = smp.UnetPlusPlus(
+                encoder_name=encoder_name, encoder_weights=encoder_weights,
+                in_channels=in_channels, classes=classes, activation=None
+            )
         elif self.arch == "deeplabv3plus":
             # DeepLabV3+: Uses Atrous Spatial Pyramid Pooling for sharp boundaries
             self.model = smp.DeepLabV3Plus(

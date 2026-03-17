@@ -80,16 +80,11 @@ class CocoSegmentationDataset(Dataset):
         return image, mask
 
 def get_training_augmentation():
-    """
-    Defines the training augmentation pipeline.
-    1. Resize to a fixed size (e.g., 320x320) for batching.
-    2. Horizontal Flip (data augmentation).
-    3. Normalize (using ImageNet stats).
-    4. Convert to Tensor.
-    """
     train_transform = [
         A.Resize(height=320, width=320),
         A.HorizontalFlip(p=0.5),
+        A.ShiftScaleRotate(shift_limit=0.0625, scale_limit=0.1, rotate_limit=15, p=0.5),
+        A.RandomBrightnessContrast(p=0.5),
         A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
         ToTensorV2()
     ]
