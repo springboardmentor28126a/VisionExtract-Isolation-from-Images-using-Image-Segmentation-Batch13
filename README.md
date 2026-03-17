@@ -191,6 +191,117 @@ The model generates:
 - Deploy as a web application
 
 ---
+---
 
-### 👨‍💻 Author
-Rahul Raj 
+# 📌 Milestone 3 – Model Improvement & Inference Pipeline
+
+## 🎯 Objective
+The goal of Milestone 3 is to improve the trained segmentation model from Milestone 2 and build an inference pipeline that can isolate subjects from new, unseen images.
+
+---
+
+## 🔄 Improvements Over Milestone 2
+
+- Continued training from pre-trained model (`final_model.pth`)
+- Added **data augmentation** to improve generalization
+- Introduced **Dice + BCE combined loss function**
+- Improved segmentation accuracy and mask quality
+- Built a complete **inference pipeline**
+
+---
+
+## 🧠 Model Enhancement
+
+### 🔹 Data Augmentation
+To improve robustness, the following augmentations were applied:
+- Horizontal Flip
+- Random Brightness & Contrast
+- Rotation & Scaling
+
+```python
+import albumentations as A
+
+transform = A.Compose([
+    A.HorizontalFlip(p=0.5),
+    A.RandomBrightnessContrast(p=0.2),
+    A.ShiftScaleRotate(p=0.3)
+])
+```
+
+---
+
+### 🔹 Improved Loss Function (Dice + BCE)
+
+```python
+def dice_loss(pred, target):
+    pred = torch.sigmoid(pred)
+    smooth = 1e-6
+
+    intersection = (pred * target).sum()
+    union = pred.sum() + target.sum()
+
+    dice = (2 * intersection + smooth) / (union + smooth)
+    return 1 - dice
+
+bce = nn.BCEWithLogitsLoss()
+
+def combined_loss(pred, target):
+    return bce(pred, target) + dice_loss(pred, target)
+```
+
+---
+
+### 🔹 Continued Training
+
+```python
+for epoch in range(5):
+    model.train()
+
+    for images, masks in train_loader:
+        outputs = model(images)
+        loss = combined_loss(outputs, masks)
+
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+```
+
+---
+
+## 🚀 Inference Pipeline
+
+The model can now process **new images** outside the dataset.
+
+### 🔹 Steps
+
+1. Upload image  
+2. Preprocess image (resize + normalize)  
+3. Predict segmentation mask  
+4. Apply mask to isolate subject  
+
+---
+
+## 🖼 Output
+
+The system generates:
+
+- **Original Image**
+- **Predicted Binary Mask**
+- **Final Output (Background Removed)**
+
+---
+
+## 📊 Results
+
+- Improved segmentation performance compared to Milestone 2  
+- Better boundary detection due to Dice Loss  
+- Model successfully generalizes to **new unseen images**  
+- Background effectively removed using predicted masks  
+
+---
+
+## 👨‍💻 Author
+Rahul Raj  
+B.Tech – Computer Science & IT
+
+---
