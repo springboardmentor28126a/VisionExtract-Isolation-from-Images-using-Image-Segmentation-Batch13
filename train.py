@@ -85,7 +85,10 @@ def train_model():
         
         # ADD THIS LINE: Step the scheduler based on validation loss
         scheduler.step(avg_val_loss)
-
+        
+        # Manually print the current learning rate
+        current_lr = optimizer.param_groups[0]['lr']
+        print(f"Current Learning Rate: {current_lr}")
         
         # Checkpoint Saving: Save the model if validation loss improves
         if avg_val_loss < best_val_loss:
