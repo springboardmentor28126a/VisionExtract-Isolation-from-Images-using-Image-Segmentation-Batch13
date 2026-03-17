@@ -191,7 +191,6 @@ The model generates:
 - Deploy as a web application
 
 ---
----
 
 # 📌 Milestone 3 – Model Improvement & Inference Pipeline
 
@@ -228,8 +227,6 @@ transform = A.Compose([
 ])
 ```
 
----
-
 ### 🔹 Improved Loss Function (Dice + BCE)
 
 ```python
@@ -249,8 +246,6 @@ def combined_loss(pred, target):
     return bce(pred, target) + dice_loss(pred, target)
 ```
 
----
-
 ### 🔹 Continued Training
 
 ```python
@@ -265,8 +260,6 @@ for epoch in range(5):
         loss.backward()
         optimizer.step()
 ```
-
----
 
 ## 🚀 Inference Pipeline
 
@@ -284,10 +277,7 @@ The model can now process **new images** outside the dataset.
 ## 🖼 Output
 
 The system generates:
-
-- **Original Image**
-- **Predicted Binary Mask**
-- **Final Output (Background Removed)**
+<img width="1182" height="384" alt="image" src="https://github.com/user-attachments/assets/79efdafb-7619-4c6c-9846-396df1d3d010" />
 
 ---
 
@@ -302,6 +292,5 @@ The system generates:
 
 ## 👨‍💻 Author
 Rahul Raj  
-B.Tech – Computer Science & IT
 
 ---
