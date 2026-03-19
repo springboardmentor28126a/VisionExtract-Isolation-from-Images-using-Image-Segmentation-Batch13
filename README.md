@@ -84,7 +84,7 @@ Mask channel correctness
 
 
 
----------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------
 
 # Milestone 2 Objectives
 Split the dataset into formal training, validation, and testing sets
@@ -169,3 +169,428 @@ Pipeline successfully verified model intelligence through two methods:
 Visual Verification: Matplotlib scripts successfully generated side-by-side comparisons of the Original RGB Image, the True Ground-Truth Mask, and the Model's Predicted Mask.
 
 Mathematical Verification: Implemented a custom Intersection over Union (IoU) function to mathematically score the exact pixel overlap between predictions and true masks.
+
+
+
+
+
+------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+# 🚀 Milestone 3 – Advanced Architecture & Automated Inference
+
+## 📌 Overview
+
+Milestone 3 focuses on transforming the VisionExtract system from a basic segmentation model into a **robust, optimized, and automated inference pipeline**. 
+
+In this phase, we improved model performance using **transfer learning**, applied **advanced training strategies**, handled real-world edge cases, and built a complete **end-to-end subject isolation system**.
+
+---
+
+# 🧠 Objectives
+
+- Improve segmentation accuracy
+- Reduce overfitting during training
+- Experiment with advanced architectures
+- Build an automated inference pipeline
+- Test model on real-world unseen images
+
+---
+
+# 🔧 Key Technical Improvements
+
+## 1️⃣ Transfer Learning (MobileNetV2 + U-Net)
+
+- Replaced traditional U-Net encoder with **MobileNetV2**
+- Loaded **pre-trained weights from ImageNet**
+- Frozen encoder layers to retain learned features
+
+### ✅ Impact:
+- Faster convergence
+- Better feature extraction
+- Improved segmentation performance
+
+---
+
+## 2️⃣ Advanced Training Strategies
+
+Implemented TensorFlow callbacks:
+
+### 🔹 EarlyStopping
+- Monitors validation loss
+- Stops training if no improvement for 3 epochs
+- Restores best model weights automatically
+
+### 🔹 ModelCheckpoint
+- Saves best-performing model during training
+- Prevents loss of optimal weights
+
+### ✅ Impact:
+- Prevents overfitting
+- Reduces training time
+- Ensures best model is always saved
+
+---
+
+## 3️⃣ Data Augmentation
+
+Applied transformations:
+
+- Random Horizontal Flip
+- Random Vertical Flip
+- Random Rotation
+
+### ✅ Impact:
+- Improves generalization
+- Makes model robust to variations
+- Reduces overfitting
+
+---
+
+## 4️⃣ Model Comparison
+
+Compared performance of:
+
+- Basic U-Net (Milestone 2)
+- MobileNet-based U-Net (Milestone 3)
+
+### Evaluation Metrics:
+- Validation Loss
+- IoU (Intersection over Union)
+- Visual Output Quality
+
+---
+
+# 🔬 Edge Case Analysis
+
+During testing on real-world images, several limitations were observed.
+
+## ❗ Observed Issues:
+- Poor segmentation for:
+  - Dark clothing
+  - Hair edges
+  - Low contrast backgrounds
+
+---
+
+## 🔍 Root Cause
+
+### 1️⃣ Resolution Limitation
+- Model trained on **128×128 images**
+- Loss of fine details (hair, edges)
+
+### 2️⃣ Dataset Bias
+- COCO dataset contains mostly:
+  - Wide-angle environmental images
+- Lacks:
+  - Close-up portraits
+  - Studio lighting conditions
+
+---
+
+# 🛠️ Post-Processing Pipeline
+
+To improve results without retraining, a custom OpenCV pipeline was implemented.
+
+---
+
+## 🔹 Step 1: Threshold Adjustment
+
+- Lowered threshold from **0.5 → 0.2**
+
+### Purpose:
+- Capture low-confidence pixels (hair, shadows)
+
+---
+
+## 🔹 Step 2: Contour Filling
+
+Used:
+- `cv2.findContours`
+- `cv2.drawContours`
+
+### Purpose:
+- Fill holes inside subject
+- Remove segmentation gaps
+
+---
+
+## 🔹 Step 3: Median Blurring
+
+Used:
+- `cv2.medianBlur`
+
+### Purpose:
+- Smooth jagged edges
+- Avoid halo effect
+
+---
+
+## ✅ Result:
+- Cleaner masks
+- Better edge continuity
+- Improved visual output
+
+---
+
+# ⚡ Final Inference Pipeline
+
+## 🔁 End-to-End Workflow
+
+# 🚀 Milestone 3 – Advanced Architecture & Automated Inference
+
+## 📌 Overview
+
+Milestone 3 focuses on transforming the VisionExtract system from a basic segmentation model into a **robust, optimized, and automated inference pipeline**. 
+
+In this phase, we improved model performance using **transfer learning**, applied **advanced training strategies**, handled real-world edge cases, and built a complete **end-to-end subject isolation system**.
+
+---
+
+# 🧠 Objectives
+
+- Improve segmentation accuracy
+- Reduce overfitting during training
+- Experiment with advanced architectures
+- Build an automated inference pipeline
+- Test model on real-world unseen images
+
+---
+
+# 🔧 Key Technical Improvements
+
+## 1️⃣ Transfer Learning (MobileNetV2 + U-Net)
+
+- Replaced traditional U-Net encoder with **MobileNetV2**
+- Loaded **pre-trained weights from ImageNet**
+- Frozen encoder layers to retain learned features
+
+### ✅ Impact:
+- Faster convergence
+- Better feature extraction
+- Improved segmentation performance
+
+---
+
+## 2️⃣ Advanced Training Strategies
+
+Implemented TensorFlow callbacks:
+
+### 🔹 EarlyStopping
+- Monitors validation loss
+- Stops training if no improvement for 3 epochs
+- Restores best model weights automatically
+
+### 🔹 ModelCheckpoint
+- Saves best-performing model during training
+- Prevents loss of optimal weights
+
+### ✅ Impact:
+- Prevents overfitting
+- Reduces training time
+- Ensures best model is always saved
+
+---
+
+## 3️⃣ Data Augmentation
+
+Applied transformations:
+
+- Random Horizontal Flip
+- Random Vertical Flip
+- Random Rotation
+
+### ✅ Impact:
+- Improves generalization
+- Makes model robust to variations
+- Reduces overfitting
+
+---
+
+## 4️⃣ Model Comparison
+
+Compared performance of:
+
+- Basic U-Net (Milestone 2)
+- MobileNet-based U-Net (Milestone 3)
+
+### Evaluation Metrics:
+- Validation Loss
+- IoU (Intersection over Union)
+- Visual Output Quality
+
+---
+
+# 🔬 Edge Case Analysis
+
+During testing on real-world images, several limitations were observed.
+
+## ❗ Observed Issues:
+- Poor segmentation for:
+  - Dark clothing
+  - Hair edges
+  - Low contrast backgrounds
+
+---
+
+## 🔍 Root Cause
+
+### 1️⃣ Resolution Limitation
+- Model trained on **128×128 images**
+- Loss of fine details (hair, edges)
+
+### 2️⃣ Dataset Bias
+- COCO dataset contains mostly:
+  - Wide-angle environmental images
+- Lacks:
+  - Close-up portraits
+  - Studio lighting conditions
+
+---
+
+# 🛠️ Post-Processing Pipeline
+
+To improve results without retraining, a custom OpenCV pipeline was implemented.
+
+---
+
+## 🔹 Step 1: Threshold Adjustment
+
+- Lowered threshold from **0.5 → 0.2**
+
+### Purpose:
+- Capture low-confidence pixels (hair, shadows)
+
+---
+
+## 🔹 Step 2: Contour Filling
+
+Used:
+- `cv2.findContours`
+- `cv2.drawContours`
+
+### Purpose:
+- Fill holes inside subject
+- Remove segmentation gaps
+
+---
+
+## 🔹 Step 3: Median Blurring
+
+Used:
+- `cv2.medianBlur`
+
+### Purpose:
+- Smooth jagged edges
+- Avoid halo effect
+
+---
+
+## ✅ Result:
+- Cleaner masks
+- Better edge continuity
+- Improved visual output
+
+---
+
+# ⚡ Final Inference Pipeline
+
+## 🔁 End-to-End Workflow
+
+Input Image
+↓
+Resize (128×128)
+↓
+Model Prediction (Mask)
+↓
+Thresholding
+↓
+Resize to Original Size
+↓
+Post-Processing
+↓
+Apply Mask
+↓
+Save Final Output
+
+
+
+---
+
+## 📸 Output
+
+- Original Image  
+- Binary Mask  
+- Final Subject-Isolated Image  
+
+---
+
+# 📊 Evaluation Metrics
+
+- **IoU (Intersection over Union)**
+- Visual Inspection (Qualitative)
+
+---
+
+# 📁 Model Output
+
+Saved Model:
+
+
+---
+
+# 🔮 Future Scope
+
+To make this production-ready:
+
+### 🔹 1. Higher Resolution Training
+- Upgrade from:
+  - 128×128 → 256×256 or 512×512
+
+---
+
+### 🔹 2. Specialized Datasets
+- Use portrait/matting datasets:
+  - MODNet
+  - Human Matting datasets
+
+---
+
+### 🔹 3. Alpha Matting
+
+Instead of binary masks:
+- Use **soft masks (alpha blending)**
+
+Better for:
+- Hair
+- Transparent edges
+
+---
+
+### 🔹 4. Advanced Models
+
+- U²-Net
+- DeepLabV3+
+- Attention U-Net
+
+---
+
+# 👨‍💻 Author
+
+**Sai Jannawar**  
+CSE (Artificial Intelligence)
+
+---
+
+# 🎯 Conclusion
+
+VisionExtract successfully demonstrates:
+
+- End-to-end segmentation pipeline  
+- Real-world problem solving  
+- Model improvement using transfer learning  
+- Practical deployment using inference pipeline  
+
+The project evolves from a basic academic model into a **real-world AI system capable of subject isolation**.
