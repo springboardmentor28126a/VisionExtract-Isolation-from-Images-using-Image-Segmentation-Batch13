@@ -53,10 +53,16 @@ def visualize_prediction():
         prob_mask = torch.sigmoid(raw_logits)
         pred_mask = (prob_mask > 0.5).float() # Threshold at 50%
 
-    # 5. Visualize
+    # 5. Visualize with Subject Isolation
     vis_img = unnormalize(image_tensor)
+    mask_np = pred_mask.squeeze().cpu().numpy() # Shape (H, W)
     
-    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+    # Apply the mask to the RGB image:
+    # We expand the (H, W) mask to (H, W, 1) so it multiplies across all 3 RGB channels.
+    # Subject pixels (1) stay original color; Background pixels (0) become black.
+    isolated_subject = vis_img * mask_np[:, :, np.newaxis]
+    
+    fig, axes = plt.subplots(1, 3, figsize=(18, 6))
     
     axes[0].imshow(vis_img)
     axes[0].set_title("Input Image")
@@ -66,8 +72,9 @@ def visualize_prediction():
     axes[1].set_title("Ground Truth Mask")
     axes[1].axis('off')
     
-    axes[2].imshow(pred_mask.squeeze().cpu().numpy(), cmap='gray')
-    axes[2].set_title("Model Prediction")
+    # This now shows the RGB subject with a black background
+    axes[2].imshow(isolated_subject)
+    axes[2].set_title("Isolated Subject (Output)")
     axes[2].axis('off')
     
     plt.tight_layout()

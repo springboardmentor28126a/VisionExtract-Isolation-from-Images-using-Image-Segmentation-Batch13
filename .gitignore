@@ -17,3 +17,5 @@ ipynb_checkpoints
 data/
 *.png
 __pycache__/
+checkpoints/
+test.jpg
