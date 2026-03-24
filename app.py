@@ -7,9 +7,7 @@ from PIL import Image
 from infer import load_model, postprocess_mask, DEVICE
 from preprocess import IMG_SIZE, imagenet_normalize
 
-
 model = load_model()
-
 
 def process_image(image: Image.Image | np.ndarray):
  
