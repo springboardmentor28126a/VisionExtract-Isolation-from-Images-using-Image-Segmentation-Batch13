@@ -8,13 +8,11 @@ import torch
 from model import UNet 
 from preprocess import IMG_SIZE, imagenet_normalize
 
-
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 THRESHOLD = 0.4
 
 IMAGENET_MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)
 IMAGENET_STD = np.array([0.229, 0.224, 0.225], dtype=np.float32)
-
 
 def load_model(weights_path: str = "best_unet.pth") -> torch.nn.Module:
     model = UNet().to(DEVICE)
