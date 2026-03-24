@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisionExtract AI</title>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --background: #0f172a;
+            --surface: #1e293b;
+            --text: #f8fafc;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background-color: var(--surface);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        }
+        h1 { text-align: center; margin-bottom: 0.5rem; }
+        p.subtitle { text-align: center; color: #94a3b8; margin-bottom: 2rem; }
+        
+        /* Drag & Drop Area */
+        .drop-zone {
+            border: 2px dashed #475569;
+            border-radius: 0.5rem;
+            padding: 3rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .drop-zone.dragover { border-color: var(--primary); background-color: rgba(59, 130, 246, 0.1); }
+        .drop-zone input { display: none; }
+        .drop-zone p { margin: 0; font-size: 1.1rem; color: #cbd5e1; }
+
+        /* Results Area */
+        .results-container {
+            display: none;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        .image-box {
+            background: #0f172a;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+        }
+        .image-box img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.25rem;
+            display: block;
+            margin: 0 auto 1rem auto;
+        }
+        .btn-download {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-download:hover { background-color: #2563eb; }
+
+        /* Loading Spinner */
+        .loader {
+            display: none;
+            border: 4px solid #1e293b;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 2rem auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>VisionExtract AI</h1>
+        <p class="subtitle">High-Fidelity Subject Isolation powered by UNet++ & EfficientNet-B3</p>
+
+        <div class="drop-zone" id="dropZone">
+            <p>Drag & Drop an image here, or click to select</p>
+            <input type="file" id="fileInput" accept="image/jpeg, image/png, image/jpg">
+        </div>
+
+        <div class="loader" id="loader"></div>
+
+        <div class="results-container" id="resultsContainer">
+            <div class="image-box">
+                <h3>Original Image</h3>
+                <img id="originalPreview" src="" alt="Original">
+            </div>
+            <div class="image-box">
+                <h3>Isolated Subject</h3>
+                <img id="resultPreview" src="" alt="Result">
+                <a id="downloadBtn" class="btn-download" download="isolated_subject.png">Download Result</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
