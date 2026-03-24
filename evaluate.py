@@ -31,18 +31,19 @@ def calculate_metrics(pred_mask, true_mask):
     
     return iou, dice
 
-def evaluate_model(weights_path, arch, device):
+def evaluate_model(weights_path, arch, encoder_name, device):
     """
     Loads a specific model architecture and weights, then runs evaluation 
     against the local validation dataset.
     """
     print(f"--- Starting Evaluation ---")
     print(f"Architecture: {arch.upper()}")
+    print(f"Encoder: {encoder_name.upper()}")
     print(f"Weights: {weights_path}")
     print(f"Device: {device}")
 
     # 1. Load Model
-    model = VisionExtractModel(arch=arch, encoder_name="resnet34").to(device)
+    model = VisionExtractModel(arch=arch, encoder_name=encoder_name).to(device)
     try:
         model.load_state_dict(torch.load(weights_path, map_location=device))
         print("Successfully loaded weights.")
@@ -90,11 +91,12 @@ def evaluate_model(weights_path, arch, device):
 def main():
     parser = argparse.ArgumentParser(description="Evaluate VisionExtract Models")
     parser.add_argument("--weights", type=str, required=True, help="Path to the .pth weights file")
-    parser.add_argument("--arch", type=str, default="unet", choices=["unet", "fpn", "deeplabv3plus"], help="Model architecture used")
+    parser.add_argument("--arch", type=str, default="unet", choices=["unet", "fpn", "unetplusplus", "deeplabv3plus"], help="Model architecture used")
+    parser.add_argument("--encoder", type=str, default="resnet34", help="Backbone encoder used (e.g., resnet34, efficientnet-b3)")
     args = parser.parse_args()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    evaluate_model(args.weights, args.arch, device)
+    evaluate_model(args.weights, args.arch, args.encoder, device)
 
 if __name__ == "__main__":
     main()
