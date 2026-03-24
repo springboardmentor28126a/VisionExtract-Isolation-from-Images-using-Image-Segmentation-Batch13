@@ -1,188 +1,365 @@
 # VisionExtract: Subject Isolation from Images using Image Segmentation
 
-## Project Overview
-VisionExtract is an image segmentation project aimed at automatically isolating the main subject from an image. Given an input image, the system produces an output where the subject is retained while the background is completely blacked out. This functionality is useful in photography automation, digital art, background replacement, augmented reality, and virtual conferencing.
-
-The project leverages deep learning-based semantic segmentation techniques to classify each pixel of an image as either belonging to the subject or the background. By learning pixel-level features from annotated datasets, the system can automatically detect objects and remove unwanted background regions.
+### Hybrid Deep Learning Approach using Mask R-CNN + DeepLabV3
 
 ---
 
-## Project Objectives
-- Implement semantic image segmentation for subject isolation
-- Preprocess image and mask data for pixel-wise learning
-- Train and fine-tune a deep learning segmentation model
-- Evaluate performance using standard segmentation metrics
-- Validate model generalization on unseen data
-- Improve segmentation quality using post-processing techniques
+## Project Overview
+
+This project presents an **AI-powered Subject Isolation System** that automatically detects and extracts the main subject from an image. The system uses a **hybrid deep learning pipeline** combining **instance segmentation (Mask R-CNN)** and **semantic segmentation (DeepLabV3)** to achieve accurate and refined subject isolation.
+
+The final system includes:
+
+* Intelligent subject detection
+* Pixel-level segmentation refinement
+* Clean background removal
+* Web-based user interface for real-time usage
+
+---
+
+## Objectives
+
+* Develop an automated system for **subject isolation from images**
+* Improve segmentation quality using a **hybrid model**
+* Compare different approaches and evaluate performance
+* Build a **complete pipeline from dataset to deployment**
+* Provide a **user-friendly web interface**
+
+---
+
+## Methodology
+
+### 🔹 Hybrid Model Approach
+
+The project uses a **two-stage hybrid architecture**:
+
+1. **Mask R-CNN**
+
+   * Detects objects in the image
+   * Generates instance-level masks
+   * Provides object labels and confidence scores
+
+2. **DeepLabV3**
+
+   * Performs semantic segmentation
+   * Refines boundaries at pixel level
+   * Improves mask accuracy
+
+### 🔹 Pipeline Flow
+
+```
+Input Image
+     ↓
+Mask R-CNN (Object Detection + Mask)
+     ↓
+Select Main Subject (Highest Confidence)
+     ↓
+DeepLabV3 (Refinement)
+     ↓
+Mask Combination
+     ↓
+Morphological Cleaning
+     ↓
+Final Subject Isolation
+     ↓
+Output Image
+```
 
 ---
 
 ## Dataset
-- Dataset: COCO 2017 (val2017 subset)
-- Total Images Used: 5000
-- Annotations: Pixel-wise segmentation masks
-- Source: https://cocodataset.org
 
-The COCO dataset is a widely used dataset in computer vision research containing real-world images with detailed annotations. Each image contains object segmentation masks that define the exact boundaries of objects present in the image.
+* Dataset Used: **COCO Dataset (Common Objects in Context)**
+* Contains:
 
----
+  * Images
+  * Object annotations
+  * Segmentation masks
 
-# Milestone 1: Dataset Handling and Preprocessing
+### Dataset Processing:
 
-## Week 1: Project Initialization and Dataset Acquisition
-- Defined project objectives and expected results
-- Downloaded and set up the COCO 2017 dataset
-- Explored dataset structure (images, annotations, categories)
-- Visualized sample images and their segmentation masks
-- Verified subject isolation using mask overlays
-- Inspected annotation JSON files and category labels
-
-**Outcome:** Clear understanding of dataset structure and subject-mask relationships.
-
----
-
-## Week 2: Data Preprocessing and Validation
-- Implemented preprocessing pipeline:
-  - Image resizing (256×256)
-  - Image normalization (0–1)
-  - Mask resizing using nearest-neighbor interpolation
-- Converted multi-class masks into binary subject-background masks
-- Applied data augmentation:
-  - Horizontal flipping
-  - Rotation
-  - Zooming
-  - Brightness adjustment
-  - Gaussian blur
-- Validated alignment between images and masks using visual inspection
-- Ensured consistent mask boundaries after resizing
-
-**Outcome:** Robust preprocessing pipeline ready for model training.
-
----
-
-# Milestone 2: Model Training, Evaluation, and Fine-Tuning
-
-## Week 3: Initial Model Training
-- Implemented U-Net based image segmentation model
-- Used all 5000 images from COCO val2017
-- Dataset split:
-  - 70% Training
-  - 15% Validation
-  - 15% Testing
-- Trained model using Binary Cross-Entropy loss
-- Used Adam optimizer for efficient gradient updates
-- Monitored training and validation loss
-- Visualized early predictions to verify learning
-
-**Outcome:** Functional segmentation model capable of subject extraction.
-
----
-
-## Week 4: Predictions and Fine-Tuning
-- Generated predictions on validation data
-- Compared predicted masks with ground truth masks
-- Evaluated using:
-  - Intersection over Union (IoU)
-  - Dice Coefficient
-  - Pixel-wise Accuracy
-- Fine-tuned model using combined BCE + Dice loss
-- Adjusted learning rate for better boundary segmentation
-- Saved final fine-tuned model
-
-**Outcome:** Improved segmentation accuracy and refined predictions.
-
----
-
-## Test Set Evaluation
-- Evaluated final model on unseen test dataset (15%)
-- Computed IoU, Dice score, and Pixel-wise accuracy
-- Visualized predictions to confirm generalization
-- Compared results with initial training performance
-
-Example Model Performance:
-
-Metric | Initial Model | Fine-Tuned Model
------- | ------------- | ---------------
-IoU | 0.4505 | 0.5502
-Dice Score | 0.5837 | 0.6521
-Accuracy | 0.7738 | 0.8125
-
----
-
-# Milestone 3: Model Improvement and Inference
-
-## Week 5: Model Enhancement
-- Improved preprocessing pipeline
-- Added additional augmentation techniques
-- Tested model robustness on diverse images
-- Refined training process for better feature learning
-
-**Outcome:** Enhanced model stability and robustness.
-
----
-
-## Week 6: Inference and Subject Isolation
-- Implemented inference pipeline for new images
-- Generated predicted segmentation masks
-- Applied thresholding to convert probability masks into binary masks
-- Multiplied binary mask with original image to isolate subject
-- Produced final output images with background removed
-
-Example inference workflow:
-
-Input Image → Segmentation Model → Predicted Mask → Binary Mask → Subject Isolation
-
-**Outcome:** Successfully isolated subjects from new unseen images.
-
----
-
-# Milestone 4: Full Pipeline and User Interface
-
-## Week 7: Pipeline Integration and Intermediate Results
-- Built a basic web interface where users can upload an image
-- Integrated the preprocessing, model inference, and post-processing into a single pipeline
-- Implemented **display of intermediate results** for demo purposes:
-  - `image` → Original image
-  - `mask1` → Output from Mask R-CNN
-  - `mask2` → Output from DeepLabV3
-  - `final_mask` → Combined refined mask
-  - `isolated` → Final subject isolated image
-- Enabled step-by-step visualization for debugging and presentation
-
-Example Pipeline:
-
-Input Image → Preprocessing → Mask1 (Mask R-CNN) → Mask2 (DeepLabV3) → Final Mask → Isolated Subject → Output Display
-
-**Outcome:** Full working pipeline with interactive demo ready for presentations.
+* Converted multi-class masks → binary masks
+* Resized images
+* Normalized pixel values
+* Validated image-mask alignment
 
 ---
 
 ## Technologies Used
-- Python
-- PyTorch
-- OpenCV
-- NumPy
-- Matplotlib
-- COCO API (pycocotools)
-- Google Colab
+
+| Category         | Tools                 |
+| ---------------- | --------------------- |
+| Language         | Python                |
+| Deep Learning    | PyTorch               |
+| Models           | Mask R-CNN, DeepLabV3 |
+| Image Processing | OpenCV                |
+| Visualization    | Matplotlib            |
+| UI               | Gradio                |
+| Platform         | Google Colab          |
 
 ---
 
-## Project Status
-- Milestone 1: Completed
-- Milestone 2: Completed
-- Milestone 3: Completed
-- Milestone 4: Completed
+## Implementation (Week-wise)
+
+---
+
+### Week 1: Project Initialization
+
+* Defined project scope and objectives
+* Selected COCO dataset
+* Explored dataset structure
+* Visualized images and masks
+
+---
+
+### Week 2: Data Preprocessing
+
+* Image resizing and normalization
+* Data augmentation:
+
+  * Flipping
+  * Rotation
+  * Scaling
+* Mask validation
+* Binary mask conversion
+
+---
+
+### Week 3: Initial Model Training
+
+* Implemented Mask R-CNN
+* Trained on dataset subset
+* Generated initial predictions
+* Observed segmentation quality
+
+---
+
+### Week 4: Prediction & Fine-tuning
+
+* Visualized predictions
+* Adjusted thresholds
+* Improved mask extraction
+* Added preprocessing enhancements
+
+---
+
+### Week 5: Model Improvement
+
+* Introduced DeepLabV3
+* Built hybrid pipeline
+* Compared models:
+
+| Model        | IoU      | Dice     | Accuracy |
+| ------------ | -------- | -------- | -------- |
+| Mask R-CNN   | Moderate | Moderate | Good     |
+| Hybrid Model | High     | High     | Better   |
+
+---
+
+### Week 6: Inference Pipeline
+
+* Built automated pipeline
+* Tested on unseen images
+* Saved output images
+* Improved robustness
+
+---
+
+### Week 7: Web Application
+
+* Built Gradio UI
+* Features:
+
+  * Upload image
+  * View mask & output
+  * Download results
+  * Show confidence & label
+
+---
+
+## Evaluation Metrics
+
+### 1. IoU (Intersection over Union)
+
+Measures overlap between predicted and actual mask.
+
+### 2. Dice Score
+
+Measures similarity between masks.
+
+### 3. Pixel Accuracy
+
+Percentage of correctly classified pixels.
+
+---
+
+## Results
+
+* Hybrid model outperformed Mask R-CNN
+* Better edge refinement
+* Improved segmentation accuracy
+* Robust on multiple object types
+
+---
+
+## Observations
+
+* Mask R-CNN works well for known objects (person, car)
+* DeepLabV3 improves boundary precision
+* Hybrid approach gives best results
+* Complex backgrounds reduce accuracy
+* Performance depends on object clarity
+
+---
+
+## Challenges Faced
+
+1. **Poor mask quality initially**
+2. **Multiple object confusion**
+3. **Black mask issue**
+4. **Model compatibility issues**
+5. **Colab limitations**
+6. **Handling no detection cases**
+7. **Combining two different model outputs**
+
+---
+
+## Solutions Implemented
+
+* Used highest confidence object selection
+* Added DeepLabV3 refinement
+* Applied morphological operations
+* Handled None masks safely
+* Resized masks before combining
+* Used fallback mechanisms
+
+---
+
+## Web Application Features
+
+* Upload image
+* Process using AI pipeline
+* Display:
+
+  * Original Image
+  * Mask
+  * Isolated Subject
+* Show:
+
+  * Object Label
+  * Confidence Score
+* Download:
+
+  * Original Image
+  * Output Image
+
+---
+
+## Installation & Setup
+
+### Step 1: Clone Repository
+
+```
+git clone <your-repo-link>
+cd project-folder
+```
+
+### Step 2: Install Dependencies
+
+```
+pip install torch torchvision opencv-python gradio matplotlib
+```
+
+### Step 3: Run Application
+
+```
+python app.py
+```
+
+OR in Colab:
+
+```
+app.launch()
+```
+
+---
+
+## ▶Usage
+
+1. Upload an image
+2. Click "Process Image"
+3. View output
+4. Download results
+
+---
+
+## Sample Output
+
+* Clean subject isolation
+* Background removed
+* Accurate segmentation
+
+---
+
+## Limitations
+
+* Not perfect for:
+
+  * Buildings
+  * Complex scenes
+  * Low-quality images
+* Depends on COCO-trained classes
+* Cannot detect unknown objects well
 
 ---
 
 ## Future Improvements
-- Train model on larger datasets
-- Implement advanced segmentation architectures such as DeepLabV3+
-- Improve boundary detection using attention mechanisms
-- Deploy the system as a web application with interactive interface
+
+* Use advanced models (U²-Net)
+* Real-time video processing
+* Multi-object selection
+* Background blur effect
+* Mobile app deployment
+* Custom dataset training
+
+---
+
+## Conclusion
+
+This project successfully demonstrates an **AI-based subject isolation system** using a hybrid deep learning approach. The integration of Mask R-CNN and DeepLabV3 significantly improves segmentation quality and produces reliable results.
+
+The system is practical, scalable, and showcases real-world AI application development from **data processing to deployment**.
+
+---
+
+## Acknowledgment
+
+* COCO Dataset
+* PyTorch Community
+* Open-source contributors
 
 ---
 
 ## Author
-Himanshu Ahirrao
+
+**Himanshu Ahirrao**
+
+---
+
+## Final Note
+
+This project is a complete pipeline including:
+
+* Data preprocessing
+* Model implementation
+* Hybrid architecture
+* Evaluation
+* Deployment
+
+It demonstrates strong understanding of:
+
+* Computer Vision
+* Deep Learning
+* Software Integration
+
+---
