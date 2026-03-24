@@ -1,104 +1,156 @@
-from torch.utils.data import DataLoader, random_split
 import torch
-import torch.nn as nn
+from torch.utils.data import DataLoader, random_split
+from torch.amp import autocast, GradScaler
+
 from torch_dataset import SegmentationTorchDataset
 from model import UNet
+from losses import BCEDiceLoss
 
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+
+assert torch.cuda.is_available(), "CUDA GPU is required but not available."
+DEVICE = torch.device("cuda")
 print("Using device:", DEVICE)
 
-# Load dataset
-full_dataset = SegmentationTorchDataset(
+dataset = SegmentationTorchDataset(
     image_dir="images/train",
-    mask_dir="masks/train"
+    mask_dir="masks/train",
+    augment=True
 )
-
-total_size = len(full_dataset)
+total_size = len(dataset)
 
 train_size = int(0.7 * total_size)
+
 val_size = int(0.15 * total_size)
+
 test_size = total_size - train_size - val_size
 
+generator = torch.Generator().manual_seed(42)
+
 train_dataset, val_dataset, test_dataset = random_split(
-    full_dataset,
-    [train_size, val_size, test_size]
+    dataset,
+    [train_size, val_size, test_size],
+    generator=generator
 )
 
-print(f"Total samples: {total_size}")
-print(f"Train (70%): {train_size}")
-print(f"Validation (15%): {val_size}")
-print(f"Test (15%): {test_size}")
 
-train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
-val_loader = DataLoader(val_dataset, batch_size=8, shuffle=False)
-test_loader = DataLoader(test_dataset, batch_size=8, shuffle=False)
+train_loader = DataLoader(
+    train_dataset,
+    batch_size=16,
+    shuffle=True,
+    num_workers=0,
+    pin_memory=True
+)
+
+val_loader = DataLoader(
+    val_dataset,
+    batch_size=16,
+    shuffle=False,
+    num_workers=0,
+    pin_memory=True
+)
+
 
 model = UNet().to(DEVICE)
 
-# CORRECT LOSS
-criterion = nn.BCEWithLogitsLoss()
 
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+criterion = BCEDiceLoss()
 
-EPOCHS = 5
+optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4, weight_decay=1e-4)
+
+scheduler = torch.optim.lr_scheduler.StepLR(
+    optimizer,
+    step_size=10,
+    gamma=0.5
+)
+
+
+scaler = GradScaler()
+
+
+EPOCHS = 20
+
+best_val = float("inf")
+
 
 for epoch in range(EPOCHS):
 
     print(f"\nEpoch {epoch+1}/{EPOCHS}")
 
     model.train()
+
     train_loss = 0
 
+
     for i, (images, masks) in enumerate(train_loader):
+
         images = images.to(DEVICE)
         masks = masks.to(DEVICE)
-
-        preds = model(images)
-        loss = criterion(preds, masks)
-
         optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+        
+        with autocast(device_type="cuda"):
+
+            preds = model(images)
+
+            loss = criterion(preds, masks)
+        scaler.scale(loss).backward()
+
+        scaler.step(optimizer)
+
+        scaler.update()
 
         train_loss += loss.item()
 
+
         if i % 20 == 0:
-            print(f"Batch {i}/{len(train_loader)} | Loss: {loss.item():.4f}")
+
+            print(
+                f"[Epoch {epoch+1}/{EPOCHS}] "
+                f"[Batch {i}/{len(train_loader)}] "
+                f"Loss: {loss.item():.4f}"
+            )
+
 
     train_loss /= len(train_loader)
-
     model.eval()
-    val_loss = 0
 
+    val_loss = 0
     with torch.no_grad():
+
         for images, masks in val_loader:
+
             images = images.to(DEVICE)
+
             masks = masks.to(DEVICE)
 
-            preds = model(images)
-            loss = criterion(preds, masks)
+
+            with autocast(device_type="cuda"):
+
+                preds = model(images)
+
+                loss = criterion(preds, masks)
+
+
             val_loss += loss.item()
+
 
     val_loss /= len(val_loader)
 
-    print(f"Train Loss: {train_loss:.4f} | Val Loss: {val_loss:.4f}")
 
-# Test evaluation
-model.eval()
-test_loss = 0
+    print(f"\nTrain Loss: {train_loss:.4f}")
 
-with torch.no_grad():
-    for images, masks in test_loader:
-        images = images.to(DEVICE)
-        masks = masks.to(DEVICE)
+    print(f"Val Loss: {val_loss:.4f}")
 
-        preds = model(images)
-        loss = criterion(preds, masks)
-        test_loss += loss.item()
 
-test_loss /= len(test_loader)
+    if val_loss < best_val:
 
-print(f"\nFinal Test Loss: {test_loss:.4f}")
+        best_val = val_loss
 
-torch.save(model.state_dict(), "unet_week4.pth")
-print("Model saved as unet_week4.pth")
+        torch.save(model.state_dict(), "best_unet.pth")
+
+        print("Best model saved")
+
+
+    scheduler.step()
+
+
+print("\nTraining complete")
