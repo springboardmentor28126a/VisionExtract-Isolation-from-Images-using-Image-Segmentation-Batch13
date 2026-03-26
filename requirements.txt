@@ -1,0 +1,27 @@
+# VisionExtract - Subject Isolation via Image Segmentation
+# Core deep learning
+torch>=2.0.0
+torchvision>=0.15.0
+
+# Segmentation models (U-Net with pre-trained encoders)
+segmentation-models-pytorch>=0.3.3
+
+# Data handling
+pycocotools>=2.0.7
+numpy>=1.24.0
+Pillow>=10.0.0
+opencv-python>=4.8.0
+albumentations>=1.3.1
+
+# Training utilities
+tqdm>=4.65.0
+tensorboard>=2.13.0
+matplotlib>=3.7.0
+scikit-learn>=1.3.0
+
+# Web UI
+gradio>=4.0.0
+
+# Misc
+pyyaml>=6.0
+pandas>=2.0.0

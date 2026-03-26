@@ -1,0 +1,126 @@
+import os, sys, argparse
+import numpy as np
+import torch
+import torch.nn as nn
+from torch.utils.data import Dataset, DataLoader
+from torch.optim.lr_scheduler import CosineAnnealingLR
+import cv2
+import albumentations as A
+from albumentations.pytorch import ToTensorV2
+import segmentation_models_pytorch as smp
+from pycocotools.coco import COCO
+from tqdm import tqdm
+
+DATA_DIR = '/content/visionextract/data/coco'
+CKPT_DIR = '/content/visionextract/outputs/checkpoints'
+IMAGE_SIZE = 256
+MEAN = [0.485, 0.456, 0.406]
+STD  = [0.229, 0.224, 0.225]
+os.makedirs(CKPT_DIR, exist_ok=True)
+
+train_tf = A.Compose([
+    A.RandomResizedCrop(size=(IMAGE_SIZE, IMAGE_SIZE), scale=(0.5, 1.0), p=1.0),
+    A.HorizontalFlip(p=0.5),
+    A.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.3, p=0.5),
+    A.Normalize(mean=MEAN, std=STD),
+    ToTensorV2(),
+])
+val_tf = A.Compose([
+    A.Resize(height=IMAGE_SIZE, width=IMAGE_SIZE),
+    A.Normalize(mean=MEAN, std=STD),
+    ToTensorV2(),
+])
+
+class COCODataset(Dataset):
+    def __init__(self, img_dir, ann_file, transforms, max_samples=None):
+        self.img_dir = img_dir
+        self.transforms = transforms
+        self.coco = COCO(ann_file)
+        ids = sorted(self.coco.imgToAnns.keys())
+        self.ids = ids[:max_samples] if max_samples else ids
+        print(f'Dataset: {len(self.ids)} images')
+    def __len__(self): return len(self.ids)
+    def __getitem__(self, idx):
+        img_id = self.ids[idx]
+        info   = self.coco.loadImgs(img_id)[0]
+        img    = cv2.imread(os.path.join(self.img_dir, info['file_name']))
+        img    = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        h, w   = img.shape[:2]
+        mask   = np.zeros((h, w), dtype=np.uint8)
+        for ann in self.coco.loadAnns(self.coco.getAnnIds(imgIds=img_id, iscrowd=False)):
+            m = self.coco.annToMask(ann)
+            if m.shape != (h, w):
+                m = cv2.resize(m, (w, h), interpolation=cv2.INTER_NEAREST)
+            mask = np.maximum(mask, m)
+        aug = self.transforms(image=img, mask=mask)
+        return aug['image'], aug['mask'].float().unsqueeze(0)
+
+class DiceLoss(nn.Module):
+    def forward(self, logits, targets):
+        p = torch.sigmoid(logits).view(logits.size(0), -1)
+        t = targets.view(targets.size(0), -1)
+        return 1 - ((2*(p*t).sum(1)+1)/(p.sum(1)+t.sum(1)+1)).mean()
+
+class Loss(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.bce  = nn.BCEWithLogitsLoss()
+        self.dice = DiceLoss()
+    def forward(self, logits, targets):
+        return 0.5*self.bce(logits, targets) + 0.5*self.dice(logits, targets)
+
+def iou_score(pred, target, thr=0.5):
+    p = pred >= thr; t = target >= thr
+    inter = (p & t).sum(); union = (p | t).sum()
+    return float(inter)/float(union) if union > 0 else 1.0
+
+def main():
+    p = argparse.ArgumentParser()
+    p.add_argument('--max_train', type=int, default=None)
+    p.add_argument('--max_val',   type=int, default=1000)
+    p.add_argument('--epochs',    type=int, default=10)
+    p.add_argument('--batch',     type=int, default=8)
+    args = p.parse_args()
+
+    device   = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f'Device: {device}')
+    img_dir  = os.path.join(DATA_DIR, 'images', 'val2017')
+    ann_file = os.path.join(DATA_DIR, 'annotations', 'instances_val2017.json')
+
+    train_loader = DataLoader(COCODataset(img_dir, ann_file, train_tf, args.max_train),
+                              batch_size=args.batch, shuffle=True, num_workers=2)
+    val_loader   = DataLoader(COCODataset(img_dir, ann_file, val_tf, args.max_val),
+                              batch_size=args.batch, shuffle=False, num_workers=2)
+
+    model     = smp.Unet('resnet50', encoder_weights='imagenet', in_channels=3, classes=1).to(device)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
+    scheduler = CosineAnnealingLR(optimizer, T_max=args.epochs, eta_min=1e-6)
+    criterion = Loss()
+    best_iou  = 0.0
+
+    for epoch in range(args.epochs):
+        model.train()
+        for imgs, masks in tqdm(train_loader, desc=f'Epoch {epoch+1}/{args.epochs} train'):
+            loss = criterion(model(imgs.to(device)), masks.to(device))
+            optimizer.zero_grad(); loss.backward(); optimizer.step()
+
+        model.eval(); ious = []
+        with torch.no_grad():
+            for imgs, masks in tqdm(val_loader, desc=f'Epoch {epoch+1}/{args.epochs} val  '):
+                preds = torch.sigmoid(model(imgs.to(device))).cpu().numpy()
+                for pr, gt in zip(preds, masks.numpy()):
+                    ious.append(iou_score(pr[0], gt[0]))
+
+        mean_iou = float(np.mean(ious))
+        scheduler.step()
+        print(f'Epoch {epoch+1}/{args.epochs} - Val IoU: {mean_iou:.4f}')
+        torch.save(model.state_dict(), f'{CKPT_DIR}/last_model.pth')
+        if mean_iou > best_iou:
+            best_iou = mean_iou
+            torch.save(model.state_dict(), f'{CKPT_DIR}/best_model.pth')
+            print(f'  ** Best IoU: {best_iou:.4f} saved **')
+
+    print(f'Done! Best IoU: {best_iou:.4f}')
+
+if __name__ == '__main__':
+    main()

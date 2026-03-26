@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.pyo
+venv/
+data/
+outputs/checkpoints/*.pth
+outputs/predictions/
+outputs/logs/
+*.zip
+.DS_Store
