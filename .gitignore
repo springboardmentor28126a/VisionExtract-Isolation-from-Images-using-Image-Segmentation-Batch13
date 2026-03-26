@@ -1,5 +1,11 @@
-val2017/
-train2017/
-annotations/
-*.pth
+# Ignore system files
+.sfdx/
 __pycache__/
+*.pyc
+
+# Ignore model file (optional)
+model.pth
+
+# Ignore large dataset
+val2017/
+annotations/
