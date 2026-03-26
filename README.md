@@ -1,5 +1,5 @@
-VisionExtract – Subject Isolation from Images using Image Segmentation
-Objective
+**VisionExtract – Subject Isolation from Images using Image Segmentation
+Objective**
 
 The goal of this project is to automatically extract the main subject from an image using deep learning-based image segmentation. The background is removed and replaced with a black background.
 
