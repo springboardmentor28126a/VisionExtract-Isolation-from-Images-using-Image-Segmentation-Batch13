@@ -69,3 +69,91 @@ Model started learning object structures and produced initial segmentation predi
 
 **Observation**  
 Model successfully learned foreground separation and produced measurable segmentation accuracy.
+
+---
+
+### Week 5 – Model Improvement & Optimization
+
+**Work Done**
+- Upgraded model from U-Net to DeepLabV3 (ResNet-50 backbone)  
+- Added advanced data augmentation:
+  - Horizontal & vertical flips  
+  - Rotation  
+  - Brightness & contrast adjustments  
+- Switched to AdamW optimizer  
+- Added learning rate scheduler  
+- Used mixed precision training (AMP) for faster GPU training  
+- Improved mask quality using post-processing  
+
+**Observation**  
+The improved model achieved better segmentation quality with cleaner edges and higher Dice/IoU scores.
+
+---
+
+### Week 6 – Inference & Deployment
+
+**Work Done**
+- Developed inference pipeline for unseen images  
+- Applied mask post-processing:
+  - Thresholding  
+  - Morphological operations  
+  - Largest connected component filtering  
+- Implemented subject isolation  
+- Supported single and batch image processing  
+- Built Gradio web interface  
+
+**Observation**  
+The system successfully generates subject-isolated outputs and works on real-world unseen images.
+
+---
+
+## Model Architecture
+- Model: DeepLabV3  
+- Backbone: ResNet-50  
+- Output: Binary segmentation mask  
+
+---
+
+## Evaluation Metrics
+- Dice Score  
+- Intersection over Union (IoU)  
+
+---
+
+## Technologies Used
+- Python  
+- PyTorch  
+- OpenCV  
+- NumPy  
+- Matplotlib  
+- Gradio  
+
+---
+
+## Final Pipeline
+
+Input Image  
+↓  
+Preprocessing  
+↓  
+DeepLabV3 Model  
+↓  
+Segmentation Mask  
+↓  
+Post-processing  
+↓  
+Subject Isolation  
+↓  
+Output Image  
+
+---
+
+## Result
+The system successfully removes the background and isolates the main subject from images with high accuracy.
+
+---
+
+## Future Work
+- Improve edge refinement  
+- Deploy model online  
+- Optimize inference speed  
