@@ -20,6 +20,7 @@ Total images used: 5000
 Annotation file: instances_val2017.json
 
 
+
 ⚙️ Preprocessing Pipeline
 
 Each image undergoes the following steps:
@@ -34,6 +35,8 @@ Normalization
 Pixel values scaled to [0, 1]
 Final Output
 Clean, enhanced image suitable for training
+
+
 
 🎯 Mask Generation Strategy
 
@@ -56,6 +59,8 @@ Generate:
 🟢 Binary mask
 🟢 Masked image (background removed)
 
+
+
 📌 Implementation:
 
 🗂️ Output Dataset Structure
@@ -68,6 +73,8 @@ processed_binary/
 Model: DeepLabV3+
 Encoder: ResNet50 (ImageNet pretrained)
 Framework: segmentation_models_pytorch
+
+
 
 🏋️ Training Details
 Input size: 256 × 256
@@ -85,6 +92,8 @@ Metrics
 IoU (Intersection over Union)
 Pixel Accuracy
 
+
+
 📌 Training code:
 
 📊 Dataset Split
@@ -92,9 +101,12 @@ Training: 70%
 Validation: 15%
 Testing: 15%
 
+
+
 🚀 Model Performance
 Best model saved based on Validation IoU
 Final evaluation performed on test set
+
 
 💻 Streamlit Web Application
 
@@ -109,12 +121,15 @@ Clean UI with animations
 Real-time inference
 Side-by-side comparison
 
+
 🔄 Inference Pipeline
 Upload image
 Resize → Normalize
 Model prediction
 Threshold mask
 Extract subject
+
+
 🧪 Sample Output
 Original Image
 Binary Mask
