@@ -1,0 +1,12 @@
+# Ignore datasets
+COCO_Dataset(25 GB)/
+processed_binary/
+
+# Ignore model weights
+*.pth
+
+# Ignore temp files
+Data_Preprocessing/temp/
+
+# Ignore system files
+.vscode/
