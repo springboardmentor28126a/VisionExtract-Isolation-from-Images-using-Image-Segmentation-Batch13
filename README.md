@@ -1,195 +1,121 @@
 # VisionExtract-Isolation-from-Images-using-Image-Segmentation-Batch13
 # COCO Data Preprocessing Pipeline
 
-## Overview
+🧠 Subject Segmentation using COCO Dataset
+📌 Project Overview
 
-This module contains scripts for preprocessing images from the **COCO 2017 dataset** and generating corresponding **segmentation masks** using the provided annotation JSON files.
+This project focuses on automatic subject segmentation using the COCO 2017 validation dataset. The goal is to extract the main object (foreground) from images using deep learning.
 
-The pipeline performs:
+The pipeline includes:
 
-* Image loading
-* Image preprocessing (resize, denoise, contrast enhancement, normalization)
-* COCO annotation parsing
-* Binary mask generation
-* Image–mask alignment for segmentation tasks
+Image preprocessing
+Binary mask generation (largest object selection)
+Dataset creation
+Deep learning model training (DeepLabV3+)
+Deployment via Streamlit web application
+📂 Dataset Used
+Dataset: COCO 2017
+Split: Validation set (val2017)
+Total images used: 5000
+Annotation file: instances_val2017.json
 
-This data is prepared for **deep learning / computer vision segmentation models**.
 
----
+⚙️ Preprocessing Pipeline
 
-## Folder Structure
+Each image undergoes the following steps:
 
-```
-Data_Preprocessing/
+Resize
+All images resized to 512 × 512
+Denoising
+Gaussian Blur applied to remove noise
+Contrast Enhancement
+CLAHE applied on L-channel (LAB color space)
+Normalization
+Pixel values scaled to [0, 1]
+Final Output
+Clean, enhanced image suitable for training
+
+🎯 Mask Generation Strategy
+
+Using COCO annotations:
+
+Extract all object masks per image
+Select largest object (main subject)
+Convert to binary mask
+Resize to 512 × 512
+Apply filtering:
+❌ Skip images with no annotations
+❌ Skip very small objects
+❌ Skip low foreground ratio
+
+Apply morphological operations:
+Closing (fill gaps)
+Opening (remove noise)
+
+Generate:
+🟢 Binary mask
+🟢 Masked image (background removed)
+
+📌 Implementation:
+
+🗂️ Output Dataset Structure
+processed_binary/
 │
-├── preprocessing.py              # Image preprocessing pipeline
-├── preprocess_coco_mask.py       # Generate COCO masks + resize
-├── img_viz.py                    # Visualization (original vs processed vs mask)
-├── sample_image.py               # Test script for a single image
-├── requirements.txt              # Required Python libraries
-└── README.md
-```
+├── images/        # Masked images (foreground only)
+├── masks/         # Binary masks
 
-COCO Dataset Location (Example):
+🧩 Model Architecture
+Model: DeepLabV3+
+Encoder: ResNet50 (ImageNet pretrained)
+Framework: segmentation_models_pytorch
 
-```
-coco2017/
-│
-├── train2017/                    # Training images
-├── val2017/                      # Validation images
-└── annotations/
-    ├── instances_train2017.json
-    └── instances_val2017.json
-```
+🏋️ Training Details
+Input size: 256 × 256
+Batch size: 8
+Epochs: 30
+Optimizer: Adam
+Learning rate: 1e-4
+Loss Function
 
----
+Combined loss:
 
-## Dataset
+Binary Cross Entropy (BCE)
+Dice Loss
+Metrics
+IoU (Intersection over Union)
+Pixel Accuracy
 
-Dataset Used: **COCO 2017**
+📌 Training code:
 
-Download from:
-https://cocodataset.org/#download
+📊 Dataset Split
+Training: 70%
+Validation: 15%
+Testing: 15%
 
-Required files:
+🚀 Model Performance
+Best model saved based on Validation IoU
+Final evaluation performed on test set
 
-* `train2017.zip`
-* `val2017.zip`
-* `annotations_trainval2017.zip`
+💻 Streamlit Web Application
 
-After extraction:
+An interactive UI is built to:
 
-```
-coco2017/
-    train2017/
-    val2017/
-    annotations/
-```
+Upload image
+Generate segmentation mask
+Extract main subject
+Download result
+Features:
+Clean UI with animations
+Real-time inference
+Side-by-side comparison
 
----
-
-## Preprocessing Steps
-
-### Image Preprocessing
-
-Performed in `preprocessing.py`:
-
-1. Read image
-2. Convert BGR → RGB
-3. Resize to 512 × 512
-4. Gaussian Blur (noise reduction)
-5. CLAHE (contrast enhancement)
-6. Normalize pixel values to range [0,1]
-
-Output:
-
-* Model-ready image tensor
-
----
-
-### Mask Generation
-
-Performed in `preprocess_coco_mask.py`:
-
-1. Load COCO annotations using `pycocotools`
-2. Find image ID from filename
-3. Extract all object segmentations
-4. Merge into a single binary mask
-5. Resize mask to **512 × 512**
-6. Ensure mask is binary (0 = background, 1 = object)
-
-Important:
-
-* Mask resizing uses **INTER_NEAREST** to avoid distortion.
-* Image and mask sizes are always aligned.
-
----
-
-## Visualization
-
-`img_viz.py` displays:
-
-* Original image
-* Preprocessed image
-* Binary segmentation mask
-
-This helps verify preprocessing and annotation correctness.
-
----
-
-## Requirements
-
-Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-Typical libraries:
-
-```
-opencv-python
-matplotlib
-numpy
-pycocotools
-```
-
----
-
-## How to Run
-
-### 1. Preprocess a sample image
-
-```bash
-python preprocessing.py
-```
-
-### 2. Generate mask from COCO annotations
-
-```bash
-python preprocess_coco_mask.py
-```
-
-### 3. Visualize results
-
-```bash
-python img_viz.py
-```
-
----
-
-## Output Format
-
-| Data  | Shape         | Type          |
-| ----- | ------------- | ------------- |
-| Image | (512, 512, 3) | float32 (0–1) |
-| Mask  | (512, 512)    | binary (0/1)  |
-
-This format is suitable for:
-
-* U-Net
-* Mask R-CNN
-* Custom segmentation models
-
----
-
-## Notes
-
-* Always apply the **same transformations** to image and mask.
-* Do not use interpolation methods other than **nearest** for masks.
-* Ensure COCO annotation paths are correctly set inside the scripts.
-
----
-
-## Use Case
-
-This preprocessing pipeline is designed for:
-
-* Instance segmentation
-* Semantic segmentation
-* Dataset preparation for deep learning models
-* Computer vision training workflows
-
-
-
-
+🔄 Inference Pipeline
+Upload image
+Resize → Normalize
+Model prediction
+Threshold mask
+Extract subject
+🧪 Sample Output
+Original Image
+Binary Mask
+Extracted Subject
