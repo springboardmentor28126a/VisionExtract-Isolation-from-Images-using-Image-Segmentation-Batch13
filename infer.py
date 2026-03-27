@@ -8,11 +8,13 @@ import torch
 from model import UNet 
 from preprocess import IMG_SIZE, imagenet_normalize
 
+
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 THRESHOLD = 0.4
 
 IMAGENET_MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)
 IMAGENET_STD = np.array([0.229, 0.224, 0.225], dtype=np.float32)
+
 
 def load_model(weights_path: str = "best_unet.pth") -> torch.nn.Module:
     model = UNet().to(DEVICE)
@@ -52,14 +54,19 @@ def fill_holes(binary_mask_u8: np.ndarray) -> np.ndarray:
     return filled
 
 
-def keep_center_seed_component(
+def keep_center_seed_components(
     hard_mask: np.ndarray,
+    probs: np.ndarray,
     seed_ratio: float = 0.08,
-    min_area_ratio: float = 0.005,
+    min_area_ratio: float = 0.015,
+    top_score_ratio: float = 0.7,
+    max_components: int = 2,
 ) -> np.ndarray:
     """
-    Keep the connected component that intersects a small seed region near the image center.
-    This is more robust than "single center pixel" when the center pixel is noisy.
+    Keep only the main foreground components (1-2), anchored on the most confident region.
+
+    This reduces "extra unwanted things" that appear when the center of the image
+    includes background clutter.
     """
     if hard_mask.max() == 0:
         return hard_mask.astype(np.uint8)
@@ -68,55 +75,65 @@ def keep_center_seed_component(
     hard_u8 = (hard_mask > 0).astype(np.uint8) * 255
 
     h, w = hard_u8.shape[:2]
-    cy, cx = h // 2, w // 2
-    r = int(min(h, w) * seed_ratio)
-    r = max(2, r)
-
-    seed = np.zeros_like(hard_u8, dtype=np.uint8)
-    cv2.circle(seed, (cx, cy), r, 255, thickness=-1)
 
     num_labels, labels, stats, _ = cv2.connectedComponentsWithStats(hard_u8, connectivity=8)
     if num_labels <= 1:
         return (hard_u8 > 0).astype(np.uint8)
 
-    # Candidate labels are those that intersect the seed.
-    seed_labels = np.unique(labels[(seed > 0)])
-    seed_labels = seed_labels[seed_labels != 0]
+    # Anchor on the most confident pixel.
+    max_y, max_x = np.unravel_index(int(np.argmax(probs)), probs.shape)
+    anchor_label = int(labels[max_y, max_x])
 
-    # Filter by minimum area to remove small specks.
     min_area = int(h * w * min_area_ratio)
 
-    best_label = None
-    best_area = -1
-    for lbl in seed_labels:
+    # Score components by mean confidence * sqrt(area).
+    scored = []
+    for lbl in range(1, num_labels):
         area = int(stats[lbl, cv2.CC_STAT_AREA])
-        if area >= min_area and area > best_area:
-            best_label = int(lbl)
-            best_area = area
+        if area < min_area:
+            continue
+        comp = labels == lbl
+        mean_prob = float(probs[comp].mean()) if np.any(comp) else 0.0
+        # Prefer larger components to avoid keeping tiny high-confidence noise.
+        score = mean_prob * (float(area) ** 0.7)
+        scored.append((lbl, area, score))
 
-    if best_label is None:
-        # Fallback: pick the largest component that meets min_area.
-        best_label = None
-        best_area = -1
-        for lbl in range(1, num_labels):
-            area = int(stats[lbl, cv2.CC_STAT_AREA])
-            if area >= min_area and area > best_area:
-                best_label = lbl
-                best_area = area
-
-    if best_label is None:
-        # Absolute fallback: largest component.
+    if not scored:
+        # Fallback: largest component.
         areas = stats[1:, cv2.CC_STAT_AREA]
         best_label = 1 + int(np.argmax(areas))
+        return (labels == best_label).astype(np.uint8)
 
-    return (labels == best_label).astype(np.uint8)
+    scored.sort(key=lambda x: x[2], reverse=True)
+    top_score = scored[0][2]
+    keep_labels = set()
+
+    # Always keep anchor label if it's valid.
+    if anchor_label != 0:
+        for lbl, area, _score in scored:
+            if lbl == anchor_label and area >= min_area:
+                keep_labels.add(lbl)
+                break
+
+    # Keep additional components only if they are close in score.
+    for lbl, _area, score in scored:
+        if score < top_score * top_score_ratio:
+            continue
+        keep_labels.add(lbl)
+        if len(keep_labels) >= max_components:
+            break
+
+    if not keep_labels:
+        keep_labels.add(scored[0][0])
+
+    return np.isin(labels, list(keep_labels)).astype(np.uint8)
 
 
 def postprocess_mask(
     logits: torch.Tensor,
     threshold: float = THRESHOLD,
     seed_ratio: float = 0.08,
-    min_area_ratio: float = 0.005,
+    min_area_ratio: float = 0.015,
 ) -> np.ndarray:
   
     probs = torch.sigmoid(logits).squeeze().detach().cpu().numpy()  
@@ -128,10 +145,16 @@ def postprocess_mask(
     hard = (probs > threshold).astype(np.uint8)
 
     # Cleanup: close small gaps, then open speckle/noise.
-    hard = cv2.morphologyEx(hard, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
+    # Use smaller kernels to avoid merging nearby background clutter into the subject.
+    hard = cv2.morphologyEx(hard, cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
     hard = cv2.morphologyEx(hard, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
 
-    hard = keep_center_seed_component(hard, seed_ratio=seed_ratio, min_area_ratio=min_area_ratio)
+    hard = keep_center_seed_components(
+        hard,
+        probs,
+        seed_ratio=seed_ratio,
+        min_area_ratio=min_area_ratio,
+    )
 
     # Fill holes so parts like hair/arms don't break into background holes.
     hard_u8 = (hard > 0).astype(np.uint8) * 255
