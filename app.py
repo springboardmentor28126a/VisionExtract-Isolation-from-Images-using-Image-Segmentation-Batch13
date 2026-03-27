@@ -3,11 +3,25 @@ import gradio as gr
 import cv2
 import torch
 from PIL import Image
+import time
 
 from infer import load_model, postprocess_mask, DEVICE
 from preprocess import IMG_SIZE, imagenet_normalize
 
-model = load_model()
+
+model = None
+
+
+def get_model():
+    global model
+    if model is None:
+        t0 = time.perf_counter()
+        print("Loading model weights...", flush=True)
+        model = load_model()
+        dt = time.perf_counter() - t0
+        print(f"Model ready in {dt:.2f}s on {DEVICE}.", flush=True)
+    return model
+
 
 def process_image(image: Image.Image | np.ndarray):
  
@@ -29,6 +43,7 @@ def process_image(image: Image.Image | np.ndarray):
     # Resize to training size and normalize like in training for the model
     resized = cv2.resize(orig_float, (IMG_SIZE, IMG_SIZE))
     resized = imagenet_normalize(resized)
+    model_inst = get_model()
 
     tensor = torch.from_numpy(resized).permute(2, 0, 1).unsqueeze(0).to(DEVICE)
 
@@ -36,9 +51,9 @@ def process_image(image: Image.Image | np.ndarray):
         if DEVICE == "cuda":
             # Faster inference on GPU; keeps accuracy much closer than manual half().
             with torch.autocast(device_type="cuda", dtype=torch.float16):
-                logits = model(tensor)
+                logits = model_inst(tensor)
         else:
-            logits = model(tensor)
+            logits = model_inst(tensor)
 
     # Soft alpha at network resolution in [0,1]
     alpha_small = postprocess_mask(logits)  # [IMG_SIZE, IMG_SIZE] float
@@ -67,5 +82,6 @@ demo = gr.Interface(
 
 
 if __name__ == "__main__":
+    print("Starting Gradio UI...", flush=True)
     demo.launch()
 
