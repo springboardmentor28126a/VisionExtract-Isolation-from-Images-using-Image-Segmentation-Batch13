@@ -7,3 +7,6 @@ jupyter
 tqdm
 Pillow
 scikit-learn
+pandas
+ipykernel
+streamlit

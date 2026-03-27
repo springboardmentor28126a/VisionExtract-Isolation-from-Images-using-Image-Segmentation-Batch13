@@ -1,138 +1,168 @@
-📌 Project Objective
-The goal of this project is to build a machine learning model capable of automatically extracting the main subject from an image. For any given input, the model renders only the subject visible while the background is set to completely black. This subject isolation process is a core component for automation in photography, digital art,virtual meetings, and augmented reality.
+VisionExtract: Image Subject Isolation using Deep Learning Segmentation
 
-Dataset Information
-Primary Dataset: COCO 2017.
-Subset Used: val2017.
-Data Split: Shuffled and divided into 70% Train, 15% Test, and 15% Val.
-Annotation Format: instances_val2017.json using pycocotools.
+## 🎯 Project Overview
 
-Project File Structure:
+A computer vision project that automatically extracts and isolates the main subject from images using advanced deep learning segmentation models. The system processes input images to generate precise binary masks and isolated subjects with clean backgrounds, making it ideal for applications in photography, digital art, virtual backgrounds, and augmented reality.
+
+VisionExtract uses image segmentation techniques to identify and extract foreground subjects from complex backgrounds. The project implements multiple neural network architectures including DeepLabV3+ and Feature Pyramid Networks (FPN) with ResNet backbones, trained on the COCO 2017 dataset.
+
+### Key Features
+
+- **Advanced Segmentation Models**: Multiple pre-trained models including DeepLabV3+ and FPN architectures
+- **Interactive Web Demo**: Streamlit-based web application for real-time image processing
+- **Comprehensive Data Pipeline**: Automated data preprocessing, augmentation, and validation
+- **Subject Isolation**: Clean extraction of main subjects with customizable background replacement
+- **Batch Processing**: Support for processing multiple images efficiently
+- **Model Evaluation**: Built-in metrics and visualization tools for model performance analysis
+
+## 📁 Project Structure
+
+```
 VISIONEXTRACT/
+├── LICENSE                          # MIT License
+├── README.md                        # Project documentation
+├── streamlit_app.py                 # Interactive web demo application
 ├── data/
-│   ├── val2017/                 # Original COCO val2017 source images
-│   ├── annotations/             # COCO JSON annotation files
-│   └── processed/               # Standardized dataset for model training
-│       ├── train/               # Training set (70%) - Includes Augmentations
-│       │   ├── original images (*.jpg)
-│       │   ├── *_resized.jpg    # Resized to 256x256
-│       │   ├── *_normalized.jpg # Pixel range [0, 1]
-│       │   ├── *_hflip.jpg      # Horizontal flip augmentation
-│       │   ├── *_vflip.jpg      # Vertical flip augmentation
-│       │   ├── *_bright.jpg     # Brightness adjustment augmentation
-│       │   ├── *_rot30.jpg      # 30-degree rotation augmentation
-│       │   ├── *_mask.png       # Binary segmentation mask
-│       │   └── *_isolated.jpg   # Subject isolated with black background
-│       │
-│       ├── val/                 # Validation set (15%)
-│       │   ├── original images (*.jpg)
-│       │   ├── *_resized.jpg
-│       │   ├── *_normalized.jpg
-│       │   ├── *_mask.png
-│       │   └── *_isolated.jpg
-│       │
-│       └── test/                # Test set (15%)
-│           ├── original images (*.jpg)
-│           ├── *_resized.jpg
-│           ├── *_normalized.jpg
-│           ├── *_mask.png
-│           └── *_isolated.jpg
-│
-├── models/
-│   └── vision_extract_best.keras
+│   ├── README.md                    # Dataset documentation
+│   ├── val2017/                     # Original COCO val2017 images
+│   ├── annotations/
+│   │   └── instances_val2017.json   # COCO annotation file
+│   └── processed/                   # Preprocessed dataset
+│       ├── train/                   # Training data (70%)
+│       ├── val/                     # Validation data (15%)
+│       └── test/                    # Test data (15%)
+├── models/                          # Pre-trained model files
+│   ├── vision_extract_best.keras
+│   ├── vision_extract_adv.keras
 │   └── vision_extract_fine_tuning.keras
-├── notebooks/
-│   └── dataset_exploration.ipynb 
-├── requirements/  
-│   └── requirements.txt         # Python dependencies
-├── src/
-│   └── split_dataset.py          # Logic for 70/15/15 data partitioning
-│   └── model.py 
-│   └── utils.py 
-│   └── utils1.py 
-└── .gitignore                    # Files ignored by Git
+├── notebooks/                       # Jupyter notebooks for development
+│   ├── dataset_exploration.ipynb    # Data analysis, visualization, preprocessing verification, unet model training and fpn model training
+│   ├── deeplab_train.ipynb          # DeepLab model training
+│   ├── deeplab_best_stage1.keras
+│   ├── deeplab_best_stage2.keras
+│   ├── deeplab_final.keras
+│   └── models/
+│       ├── fpn_visionextract_final.keras
+│       └── fpn_visionextract_finetuned.keras
+├── requirements/
+│   └── requirements.txt             # Python dependencies
+├── src/                             # Source code
+│   ├── model.py                     # unet Model architectures
+│   ├── model_deeplab.py             # DeepLab model architecture
+│   ├── model1.py                    # unet adv model architecture
+│   ├── utils.py                     # unet initial training
+│   ├── utils_deeplab.py             # DeepLab training
+│   ├── utils1.py                    # unet finetuned training
+│   ├── utils2.py                    # unet adv training
+│   ├── utils3.py                    # fpn training
+│   ├── split_dataset.py             # Dataset splitting logic
+│   └── __pycache__/                 # Python cache files
 
-✅ Milestone 1: 
-Progress Summary
+## 🚀 Quick Start
 
-Week 1: 
-Initialization & Dataset Inspection
-Successfully loaded COCO annotations and explored image/annotation relationships.
-Performed Exploratory Data Analysis (EDA) to understand object categories and mask structures.
-Verified data by displaying original images alongside generated segmentation masks.
+### Prerequisites
 
-Week 2: 
-Preprocessing & Binary Masking:
+- Python 3.8+
+- TensorFlow 2.x
 
-Binary Mask Conversion:
-Raw COCO annotations contain multiple object classes. For this project, these were converted into binary masks.
-Subject Pixels: Set to 1 (Foreground).
-Background Pixels: Set to 0 (Black).
-Subject Isolation: By applying the generated binary mask to the original image,the subject remains in its original color while all background pixels are rendered black.
+### Installation
 
-Preprocessing Pipeline:.
-Resizing: All inputs were resized to 256*256$ pixels.
-Normalization: Pixel intensities were scaled from [0, 255] to [0, 1] to improve training stability.
-Augmentation: flipping,rotation,brightening for training set.
+ **Create a virtual environment** (recommended):
+   ```bash
+   conda create -n visionextract python=3.8
+   conda activate visionextract
+   ```
 
-🎯 Outcomes Achieved
-Dataset successfully loaded and inspected.
-Binary segmentation masks generated.
-Preprocessing pipeline established (Resize, Normalize, Augment).
-Subject isolation logic verified.
+ **Install dependencies**:
+   ```bash
+   pip install -r requirements/requirements.txt
+   pip install streamlit  # Additional requirement for the web app
+   ```
+
+### Running the Web Demo
+
+```bash
+streamlit run streamlit_app.py
+```
+
+This launches an interactive web application where you can:
+- Upload images (JPEG, PNG, AVIF formats)
+- Select from available pre-trained models
+- View preprocessing, mask prediction, and subject isolation results
+- Download processed outputs
+
+## 📊 Dataset
+
+### Source Data
+- **Primary Dataset**: COCO 2017 Validation Set
+- **Annotation Format**: COCO JSON format (`instances_val2017.json`)
+- **Data Split**: 70% Training, 15% Validation, 15% Test
+
+### Preprocessing Pipeline
+The data processing pipeline includes:
+- **Image Resizing**: Standardized to 256x256 pixels
+- **Normalization**: Pixel values scaled to [0,1] range
+- **Data Augmentation**: Horizontal/vertical flips, brightness adjustments, rotations
+- **Mask Generation**: Binary segmentation masks for subject isolation
+- **Subject Isolation**: Clean subject extraction with black backgrounds
+
+## 🧠 Models
+
+### Available Models
+
+1. **vision_extract_best.keras** - Primary production model
+2. **vision_extract_adv.keras** - Advanced variant with improved accuracy
+3. **vision_extract_fine_tuning.keras** - Fine-tuned model for specific use cases
+4. **DeepLab Models**:
+   - `deeplab_final.keras` - Final trained DeepLab model
+   - `deeplab_best_stage1.keras` - Best model from first training stage
+   - `deeplab_best_stage2.keras` - Best model from second training stage
+5. **FPN Models**:
+   - `fpn_visionextract_final.keras` - Final FPN model
+   - `fpn_visionextract_finetuned.keras` - Fine-tuned FPN variant
+
+### Model Architectures
+
+- **DeepLabV3+**: Atrous convolution-based segmentation with encoder-decoder structure
+- **Feature Pyramid Network (FPN)**: Multi-scale feature fusion for improved segmentation accuracy
+- **Backbone**: Mobilenetv2
+- **Loss Functions**: Dice loss, Focal loss, and combinations
+- **Output**: Binary segmentation masks
+
+## 🏋️ Training
+
+### Training Notebooks
+
+- `dataset_exploration.ipynb`: Data analysis, visualization, preprocessing verification, unet model training and fpn model training
+- `deeplab_train.ipynb`: Complete training pipeline for DeepLab models
+
+### Training Process
+
+1. **Data Preparation**: Load and preprocess COCO dataset
+2. **Model Initialization**: Load pre-trained backbones with ImageNet weights
+3. **Training Stages**:
+   - Stage 1: Initial training with frozen backbone
+   - Stage 2: Fine-tuning with unfrozen backbone layers
+4. **Evaluation**: Dice coefficient, IoU, precision, recall metrics
+5. **Model Selection**: Best models saved based on validation performance
 
 
-✅ Milestone 2: 
-VisionExtract: Isolation from Images using Image Segmentation
-VisionExtract is a deep learning system designed for precise subject isolation. By utilizing a custom-built U-Net architecture, the model learns to generate binary masks that separate foreground subjects from complex backgrounds, specifically optimized using the COCO 2017 dataset(val2017).
+## 📈 Performance Metrics
 
+The models are evaluated using standard segmentation metrics:
+- **Dice Coefficient**: Measures overlap between predicted and ground truth masks
+- **IoU (Intersection over Union)**: Pixel-level overlap metric
+- **Accuracy**: Pixel classification accuracy on binary subject/background
+- **Loss**: Dice loss used for training (lower is better)
 
-🏗 Model Architecture (model.py)
-The model is a deep Convolutional Neural Network (CNN) based on the U-Net design, optimized for a 256 x 256 input resolution.
-Encoder: 4 levels of double convolutions, batch normalization, and max-pooling to extract hierarchical features.
-Bottleneck: The deepest layer (16, 16, 1024) captures abstract global context.
-Decoder: Uses Transposed Convolutions and Skip Connections to recover spatial resolution for pixel-perfect masks.
-Final Layer: 1 x 1 Convolution with Sigmoid activation for binary segmentation.
+### Per-model evaluation (one batch from `data/processed/val`, 256x256)
 
-
-🎲 Dice Loss
-Definition: Dice Loss is a loss function based on the Sørensen–Dice coefficient, which is a statistic used to gauge the similarity of two samples. In image segmentation, it measures the overlap between two samples by taking twice the area of overlap and dividing it by the sum of the total number of pixels in both masks.
-
-🏗️ Intersection over Union (IoU)
-Definition: Intersection over Union (also known as the Jaccard Index) is a metric used to measure the accuracy of an object detector or segmentation model on a particular dataset. It calculates the ratio between the area of overlap and the area of union between the predicted segmentation map and the ground truth mask.
-
-
-📊 Training Strategy
-
-1.Initial Training (utils.py)
-Focused on basic convergence using normalized image-mask pairs.
-Optimizer: Adam (LR = 1e-4)
-Batch Size: 16
-Epochs: 15
-Validation Result: Accuracy ~80%, Mean IoU ~0.35, Dice Loss ~0.32.
-
-2.Fine-Tuning with Augmentation (utils1.py)
-To improve robustness, we introduced a second phase with a lower learning rate and dynamic data augmentation.
-Optimizer: Adam (LR = 1e-5)
-Batch Size: 16
-Epochs: 5
-Augmentations: Brightness shifts and Horizontal flips.
-Metrics: Added Class-Specific IoU (bg_iou and subject_iou).
-
-Final Validation Result
-Accuracy 78.02%
-Subject IoU 50.85%
-Background IoU 71.41%
-Mean IOU 61.13%
-Dice Loss 0.3301
-
-
-🖼 Outcomes
-The model successfully isolates subjects even in images with overlapping elements. The fine-tuning phase significantly improved the model's ability to "see" smaller subjects.
-
-
-🛠 Tech Stack
-Core: Python, TensorFlow, Keras
-Processing: OpenCV, NumPy
-Visualization: Matplotlib
-Dataset: COCO 2017 (val2017)
+| Model                                                                |Accuracy|  IoU   | Dice Loss|        Notes                   |
+|---|---|---|---|---|
+| UNet (`models/vision_extract_best.keras`)                            | 0.7686 | 0.5558 | 0.3405 | Baseline UNet-style model        |
+| Fine Tuned UNet (`models/vision_extract_fine_tuning.keras`)          | 0.7805 | 0.6116 | 0.3387 | Fine-tuned UNet variant          |
+| Updated UNet (`models/vision_extract_adv.keras`)                     | 0.6148 | 0.5063 | 0.2807 | Advanced UNet with modifications |
+| FPN (`notebooks/models/fpn_visionextract_final.keras`)               | 0.8057 | 0.5545 | 0.2357 | Feature Pyramid Network model    |
+| Fine Tuned FPN (`notebooks/models/fpn_visionextract_finetuned.keras`)| 0.8062 | 0.5491 | 0.2512 | Fine-tuned FPN variant           |
+| DeepLabV3+ Stage1 (`notebooks/deeplab_best_stage1.keras`)            | 0.8335 | 0.5884 | 0.2474 | DeepLabV3+ after stage 1 training|
+| DeepLabV3+ Stage2 (`notebooks/deeplab_best_stage2.keras`)            | 0.8251 | 0.5773 | 0.2578 | DeepLabV3+ after stage 2 training|

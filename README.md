@@ -1,1 +1,1 @@
-# VisionExtract-Isolation-from-Images-using-Image-Segmentation-Batch13
+# VisionExtract: Image Subject Isolation using Deep Learning Segmentation
