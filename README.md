@@ -289,6 +289,45 @@ The system generates:
 - Background effectively removed using predicted masks  
 
 ---
+---
+
+# 📌 Milestone 4 – User Interface
+
+## 🎯 Objective
+Build a simple UI to interact with the trained model for real-time subject isolation.
+
+---
+
+## 🖥️ Overview
+A web app using **Streamlit** allows users to:
+- Upload an image  
+- Generate segmentation mask  
+- View background-removed output  
+- Download result  
+
+---
+
+## 🛠 Tech Stack
+- Python  
+- PyTorch  
+- Streamlit  
+- OpenCV  
+
+---
+
+## ⚙️ Workflow
+Upload → Preprocess → Model → Mask → Output  
+
+---
+
+## 🚀 Features
+- Real-time processing  
+- Clean UI  
+- Uses **Milestone 3 model**
+  
+<img width="1784" height="1318" alt="special-pancake-r4g9qjx5j6j4fp544-8501 app github dev_ (2)" src="https://github.com/user-attachments/assets/897c311e-5bd6-4efe-aed9-1b9c02562d00" />
+
+---
 
 ## 👨‍💻 Author
 Rahul Raj  
