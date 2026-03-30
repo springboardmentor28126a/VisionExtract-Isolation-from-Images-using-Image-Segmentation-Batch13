@@ -19,7 +19,7 @@ INPUT_FOLDER = os.path.join(BASE_DIR, "week6_test_images")
 OUTPUT_FOLDER = os.path.join(BASE_DIR, "week6_outputs")
 
 # 👉 Use FINAL trained model
-MODEL_PATH = os.path.join(BASE_DIR, "deeplab_checkpoint.pth")
+MODEL_PATH = os.path.join(BASE_DIR, "deeplab_resnet50.pth")
 
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
