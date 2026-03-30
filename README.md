@@ -339,7 +339,150 @@ Data Engineering → Model Training → Model Optimization → Deployment Pipeli
 * Mobile inference optimization
 
 ---
+# VisionExtract — Milestone 4: Full Pipeline and User Interface
 
-# 👩‍💻 Author
+## Overview
+
+Milestone 4 focuses on integrating the complete subject extraction pipeline into a user-friendly application and preparing the project for final demonstration and presentation. This stage transforms the trained model into a usable system capable of processing real-world inputs.
+
+---
+
+## Week 7: Full Pipeline and User Interface
+
+### Objective
+
+To build a complete end-to-end system where users can upload an image and receive a subject-isolated output using the trained segmentation model.
+
+---
+
+## System Pipeline Integration
+
+The full pipeline integrates preprocessing, model inference, and output generation into a single streamlined workflow.
+
+### Pipeline Steps
+
+1. **Input Image Upload**
+   - User uploads an image through the interface.
+
+2. **Preprocessing**
+   - Image is resized to model input size (320×320).
+   - Normalization is applied using ImageNet standards.
+
+3. **Model Inference**
+   - Preprocessed image is passed to the trained DeepLabV3+ model.
+   - Model generates a probability mask.
+
+4. **Mask Processing**
+   - Thresholding is applied to convert probability mask into binary mask.
+   - Largest connected component is selected as the main subject.
+   - Mask is refined using smoothing and morphological operations.
+
+5. **Resolution Restoration**
+   - Processed mask is resized back to the original image resolution.
+
+6. **Output Generation**
+   - Background is removed using the mask.
+   - Output is generated as:
+     - Black background image OR
+     - Transparent PNG image (optional)
+
+---
+
+## User Interface Implementation
+
+### Technology Used
+
+- Gradio (Python-based web UI framework)
+
+### Features
+
+- Image upload interface
+- Adjustable threshold slider for segmentation control
+- Edge smoothing control
+- Transparent background output option
+- Real-time result visualization
+
+---
+
+## Sample Interface Workflow
+
+1. Upload an image
+2. Adjust threshold and smoothing parameters
+3. Enable/disable transparent background
+4. Click submit to process
+5. View extracted subject output
+
+---
+
+## Key Functional Components
+
+### Inference Function
+
+- Handles preprocessing, prediction, and post-processing
+- Ensures output matches original image resolution
+
+### Mask Refinement
+
+- Applies smoothing for edge quality
+- Uses connected component analysis to isolate main subject
+
+### Output Rendering
+
+- Supports RGB output (black background)
+- Supports RGBA output (transparent background)
+
+---
+
+## Week 8: Documentation, Presentation, and Demo
+
+### Documentation
+
+- Compiled complete project documentation including:
+  - Data preprocessing pipeline
+  - Model architecture and training process
+  - Inference workflow
+  - Post-processing techniques
+
+---
+
+### Presentation Preparation
+
+- Created presentation covering:
+  - Problem statement and objectives
+  - Methodology and pipeline design
+  - Model training and evaluation
+  - System architecture
+  - Results and improvements
+
+---
+
+### Demonstration
+
+- Demonstrated live system with:
+  - Real-time image upload
+  - Adjustable parameters
+  - Immediate output generation
+
+- Showcased:
+  - Before and after images
+  - Performance across different object types
+  - Robustness on unseen images
+
+---
+
+## Final Output Capabilities
+
+- Accurate subject extraction across multiple categories
+- Clean background removal
+- High-resolution output (same as input size)
+- User-controlled segmentation behavior
+- Interactive and responsive interface
+
+---
+
+## Conclusion
+
+Milestone 4 successfully completes the VisionExtract project by delivering a fully functional application. The integration of preprocessing, model inference, and user interaction demonstrates a practical and deployable solution for subject isolation using deep learning.
+#  Author
 
 **Jafina Zeenath**
