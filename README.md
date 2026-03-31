@@ -1,76 +1,73 @@
 # VisionExtract-Isolation-from-Images-using-Image-Segmentation-Batch13
-VisionExtract – Milestone 1
+# VisionExtract
 
-📌 Project Objective
+VisionExtract is a deep learning-based project that focuses on isolating the main subject from an image using image segmentation techniques. The system takes an input image and predicts a pixel-wise mask to distinguish the foreground from the background.
 
-The goal of this project is to build a subject isolation system using image segmentation.
-For a given input image, the system should extract the main subject and make the background completely black.
+Using this mask, the background is removed by converting it to black, while preserving only the subject in its original form. This allows the model to effectively perform subject extraction without manual editing.
 
-📂 Dataset Used
+The project demonstrates a complete pipeline including data preprocessing, model training using a U-Net architecture, evaluation with segmentation metrics, and deployment through a simple user interface.
 
-Dataset: COCO 2017
+---
 
-Subset Used: val2017 
+## Project Overview
 
-Annotation File: instances_val2017.json
+The main objective of this project is to build an automated system for subject isolation. The model learns to identify the important regions of an image and separate them from the background.
 
-✅ Milestone 1 – Week 1
-1. Dataset Inspection
+The workflow includes preparing the dataset, training a segmentation model, evaluating its performance, and deploying the final model for real-time usage through a web interface.
 
-Loaded COCO annotations using pycocotools
+---
 
-Explored image IDs and annotation IDs
+## Milestone 1: Data Preparation
 
-Understood relationship between images and objects
+In this phase, the dataset is organized and prepared for training.
 
-2. Visualized Sample Data
+- Images and corresponding masks are collected
+- Masks are converted into binary format (subject vs background)
+- Images are resized and normalized
+- Dataset is split into training and validation sets
 
-Displayed original image
+---
 
-Generated segmentation mask from annotations
+## Milestone 2: Model Training
 
-Confirmed mask alignment with image
+In this phase, the segmentation model is implemented and trained.
 
-✅ Milestone 1 – Week 2
+- Model is defined in `model.py`
+- Training pipeline is implemented in `train.py`
+- Loss function and optimizer are configured
+- Model learns to predict pixel-wise segmentation masks
 
-🔹 Binary Mask Conversion
+---
 
-Converted multi-class segmentation masks into binary format
+## Milestone 3: Evaluation and Improvement
 
-Object pixels = 1
+In this phase, the performance of the model is evaluated.
 
-Background pixels = 0
+- Metrics such as IoU, Dice Score, and Accuracy are used
+- Validation results are monitored across epochs
+- Model is fine-tuned to improve performance
+- Best model is saved for later use
 
-🔹 Preprocessing Pipeline
+---
 
-The following preprocessing steps were implemented:
+## Milestone 4: Deployment
 
-Image resizing to 256×256
+In this phase, the trained model is deployed through a user interface.
 
-Mask resizing using INTER_NEAREST to preserve binary values
+- Streamlit app is created in `app.py`
+- Users can upload images for processing
+- Model generates isolated subject output
+- Output image is displayed and can be downloaded
 
-Image normalization (pixel range 0–255 → 0–1)
+---
 
-Image-mask alignment verification
+## Files
 
-🔹 Subject Isolation
+- model.py - Model implementation  
+- train.py - Training script  
+- dataset.py - Dataset loader  
+- preprocess.py - Image preprocessing  
+- metrics.py - Evaluation metrics  
+- app.py - Streamlit interface  
 
-Applied binary mask to image
-
-Generated output where:
-
-Object pixels are preserved
-
-Background pixels are set to black
-
-🎯 Outcome of Milestone 1
-
-✔ Dataset successfully loaded and inspected 
-
-✔ Binary segmentation masks generated
-
-✔ Preprocessing pipeline established
-
-✔ Subject isolation demonstrated
-
-Milestone 1 completed successfully.
+---
