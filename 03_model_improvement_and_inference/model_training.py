@@ -102,7 +102,7 @@ optimizer = optim.Adam(model.parameters(), lr=3e-5)
 # =========================
 # TRAINING
 # =========================
-num_epochs = 20
+num_epochs = 30
 
 for epoch in range(num_epochs):
 

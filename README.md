@@ -1,6 +1,6 @@
-VisionExtract – Subject Isolation using Image Segmentation
+# VisionExtract – Subject Isolation using Image Segmentation
 
-Project Description
+## Project Description
 
 VisionExtract is a deep learning project designed to automatically isolate the main subject from an image using image segmentation techniques.
 
@@ -8,166 +8,220 @@ Given an input image, the system predicts a binary segmentation mask that identi
 
 This project demonstrates the complete machine learning pipeline for an image segmentation system including:
 
-- Dataset acquisition and exploration
-- Data preprocessing and preparation
-- Deep learning model development
-- Training and prediction generation
-- Evaluation using segmentation metrics
-
-Dataset Used: COCO 2017 Dataset
+- Dataset acquisition and exploration  
+- Data preprocessing and preparation  
+- Deep learning model development  
+- Training and prediction generation  
+- Model improvement and optimization  
+- Deployment using a web application  
 
 ---
 
-Milestone 1 – Data Preprocessing
+## Dataset Used: COCO 2017 Dataset
 
-Objective
+---
+
+# 🔹 Milestone 1 – Data Preprocessing
+
+## Objective
 
 The goal of this milestone is to prepare the dataset for training the segmentation model. Raw images and masks must be processed to ensure consistency and correct alignment.
 
-Proper preprocessing ensures the segmentation model learns meaningful features and performs accurate subject extraction.
+## Key Tasks
 
-Key Tasks
+- Inspect dataset structure and annotations  
+- Preprocess images and segmentation masks  
+- Resize images to a consistent dimension  
+- Normalize image pixel values  
+- Convert masks into binary subject/background format  
+- Shuffle dataset samples for better model generalization  
 
-- Inspect dataset structure and annotations
-- Preprocess images and segmentation masks
-- Resize images to a consistent dimension
-- Normalize image pixel values
-- Convert masks into binary subject/background format
-- Shuffle dataset samples for better model generalization
+## Implementation Files
 
-Implementation Files
-
-preprocessing.py
-
+### preprocessing.py
 Responsible for:
+- Image resizing  
+- Image normalization  
+- Mask formatting  
+- Preparing input tensors  
 
-- Image resizing
-- Image normalization
-- Mask formatting
-- Preparing input tensors for training
-
-shuffling.py
-
+### shuffling.py
 Responsible for:
+- Randomizing dataset samples  
+- Preventing training bias  
 
-- Randomizing dataset samples
-- Preventing training bias
-- Improving model generalization
+## Expected Output
 
-Expected Output
-
-The preprocessing pipeline produces:
-
-- Clean and aligned image–mask pairs
-- Consistent image resolution
-- Properly formatted binary masks
-- Randomized dataset ready for training
+- Clean image–mask pairs  
+- Consistent resolution  
+- Binary masks  
+- Training-ready dataset  
 
 ---
 
-Milestone 2 – Model Training
+# 🔹 Milestone 2 – Model Training
 
-Objective
+## Objective
 
-The goal of this milestone is to build and train a deep learning segmentation model capable of predicting the subject region in an image.
+To build and train a deep learning segmentation model capable of extracting the subject region.
 
-The architecture used for this project is based on U-Net, a popular convolutional neural network for pixel-level image segmentation.
+## Model Used
 
-Key Tasks
+- U-Net Architecture (initial model)
 
-- Implement U-Net architecture
-- Train the segmentation model on the processed dataset
-- Generate predicted segmentation masks
-- Perform early evaluation on validation data
-- Prepare the model for further tuning and improvement
+## Key Tasks
 
-Implementation Files
+- Implement U-Net architecture  
+- Train model on dataset  
+- Generate segmentation masks  
+- Evaluate on validation data  
 
-unet_model.py
+## Implementation Files
 
-Defines the structure of the U-Net segmentation network, including:
+### unet_model.py
+Defines:
+- Encoder  
+- Decoder  
+- Skip connections  
 
-- Encoder layers
-- Decoder layers
-- Skip connections
-- Convolution operations
+### unet_implementation.py
+Handles:
+- Training loop  
+- Loss calculation  
+- Optimization  
+- Prediction generation  
 
-This file constructs the full segmentation model.
+## Evaluation Metrics
 
-unet_implementation.py
-
-Handles the execution pipeline including:
-
-- Model initialization
-- Training loop
-- Loss computation
-- Optimizer configuration
-- Prediction generation
-
-Model Output
-
-The trained model generates:
-
-- Predicted segmentation masks
-- Subject-isolated output images
-
-The output mask is applied to the original image to retain only the subject.
+- Intersection over Union (IoU)  
+- Dice Coefficient  
+- Pixel Accuracy  
 
 ---
 
-Evaluation Metrics
+# 🔹 Milestone 3 – Model Improvement & Inference
 
-The segmentation performance will be evaluated using the following metrics:
+## Objective
 
-Intersection over Union (IoU)
+To improve segmentation accuracy and perform robust inference on unseen images.
 
-Measures the overlap between predicted mask and ground-truth mask.
+## Improvements Made
 
-Dice Coefficient
+- Switched to **DeepLabV3 with ResNet50 backbone**
+- Better feature extraction using pretrained weights  
+- Combined **BCE Loss + Dice Loss**  
+- Improved generalization on complex backgrounds  
 
-Measures similarity between predicted and actual segmentation regions.
+## Key Tasks
 
-Pixel Accuracy
+- Load pretrained DeepLabV3 model  
+- Fine-tune on dataset  
+- Implement validation pipeline  
+- Generate improved segmentation outputs  
 
-Measures the percentage of correctly classified pixels.
+## Inference Enhancements
 
-Higher values indicate better segmentation performance.
+- Resize prediction to original image size  
+- Apply sigmoid activation  
+- Thresholding for mask generation  
+- Gaussian smoothing for noise reduction  
+- Largest connected component extraction  
+- Morphological operations (open & close)  
 
-----
+## Output
+
+- High-quality segmentation masks  
+- Cleaner subject isolation  
+- Reduced background noise  
+
+---
+
+# 🔹 Milestone 4 – Model Deployment (Streamlit Web App)
+
+## Objective
+
+To deploy the trained segmentation model into an interactive web application for real-time usage.
+
+## Features
+
+- Upload image through UI  
+- Real-time background removal  
+- Subject isolation using trained model  
+- Custom background options (black/white/custom)  
+- Download processed output  
+- Clean and user-friendly interface  
+
+## Technologies Used
+
+- Streamlit (Frontend + Backend)  
+- PyTorch (Model Inference)  
+- OpenCV (Image Processing)  
+
+## Implementation
+
+### app.py
+
+Handles:
+- User interface  
+- Image upload  
+- Model loading  
+- Inference pipeline  
+- Displaying results  
+- Download functionality  
+
+## Output
+
+- Original image preview  
+- Segmented output image  
+- Downloadable result  
+
+---
+
 ```
-Project Directory Structure
-
+# 📁 Project Directory Structure
 VisionExtract_Segmentation
 │
-├── data_preprocessing
-│   │
-│   ├── preprocessing.py
-│   │   └── Handles image preprocessing, resizing, normalization, and mask preparation
-│   │
-│   └── shuffling.py
-│       └── Randomizes dataset samples for training
+├── 01_data_preprocessing
+│ ├── preprocessing.py
+│ └── shuffling.py
 │
-├── model_training
-│   │
-│   ├── unet_model.py
-│   │   └── Defines the U-Net segmentation architecture
-│   │
-│   └── unet_implementation.py
-│       └── Executes model training and prediction pipeline
+├── 02_model_training
+│ ├── unet_model.py
+│ └── unet_implementation.py
 │
-├── results
-│   │
-│   |── preprocessing_results
-│   |    ├── results_2.png
-│   |    ├── result_2.png
-│   |    ├──results_3.png
-│   |    ├──results_4.png
-│   |    ├──results_5.png
-|   |──segmentation_output.png
-|   |──training_output.png
-|
+├── 03_model_improvement_and_inference
+│ ├── deeplab_model.py
+│ ├── training.py
+│ └── inference.py
+│
+├── 04_model_streamlit_app
+│ └── app.py
+│
+├── 05_results
+│ ├── preprocessing_results
+│ ├── segmentation_output.png
+│ └── training_output.png
+│ ├── model_training_result.png
+│ ├── inference_result.png
+│ └── app_interface.png
+│
 └── README.md
 ```
+
+---
+
+# 🎯 Final Outcome
+
+- Built an end-to-end image segmentation pipeline  
+- Improved model performance using DeepLabV3  
+- Successfully deployed model as a web application  
+- Enabled real-time subject isolation  
+
+---
+
+# 🧠 Conclusion
+
+VisionExtract demonstrates a complete deep learning workflow from data preprocessing to deployment. The integration of advanced segmentation models with an interactive interface makes it practical for real-world applications such as background removal, image editing, and object extraction.
 
 
 
