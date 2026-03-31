@@ -2,6 +2,7 @@ import torch
 from torch.utils.data import DataLoader
 import torch.nn as nn
 import torch.optim as optim
+import os
 
 from dataset import COCOSegmentationDataset
 from model import UNet
@@ -28,6 +29,11 @@ def main():
     val_loader = DataLoader(val_dataset, batch_size=8, num_workers=2)
 
     model = UNet().to(device)
+    
+    # Load existing weights if available
+    if os.path.exists("best_model_main_subject.pth"):
+        model.load_state_dict(torch.load("best_model_main_subject.pth", map_location=device))
+        print("Loaded saved model weights!")
 
     # criterion = nn.BCEWithLogitsLoss()
     pos_weight = torch.tensor([3.0]).to(device)
@@ -35,7 +41,7 @@ def main():
     optimizer = optim.Adam(model.parameters(), lr=1e-4)
 
     best_iou = 0
-    epochs = 30
+    epochs = 5
 
     for epoch in range(epochs):
 

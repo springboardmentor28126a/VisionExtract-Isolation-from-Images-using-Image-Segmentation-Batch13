@@ -1,6 +1,4 @@
 # VisionExtract-Isolation-from-Images-using-Image-Segmentation-Batch13
-# Contributions by Hithesh N
-
 
 # 🚀 VisionExtract
 ## Subject Isolation Using Image Segmentation
@@ -16,12 +14,6 @@ The system learns to:
 - Generate a binary mask
 - Enable background removal
 
-### 📅 Project Milestones
-
-- ✅ Week 1 – Dataset Understanding & Mask Generation
-- ✅ Week 2 – Data Preprocessing Pipeline
-- 🔜 Week 3 – Model Architecture & Training
-
 ### 📂 Project Structure
 
 ```
@@ -33,18 +25,21 @@ VisionExtract-Isolation-from-Images-using-Image-Segmentation-Batch13/
 │   └── splits/                   # Train/Val/Test split files
 │
 └── codes/
-    ├── split_dataset.py
-    ├── generate_mask.py
-    ├── preprocessing.py
-    ├── test_preprocessing.py
-    └── visualize.py
+    ├── [Python scripts]          # Dataset, model, training, preprocessing scripts
+    ├── [Trained models]          # best_model.pth, best_model_main_subject.pth
+    ├── __pycache__/              # Python cache
+    └── web_app/                  # Web application
+        ├── app.py                # Flask web application
+        ├── static/               # Static files (CSS, JS, images)
+        ├── templates/            # HTML templates
+        └── uploads/              # Upload directory
 ```
 
 ---
 
-## 🧠 Week 1 – Dataset Understanding & Preparation
+## 📦 Dataset Preparation
 
-### 📦 Dataset Used
+### Dataset Used
 
 We used the **COCO 2017 Dataset** (Common Objects in Context).
 
@@ -124,36 +119,9 @@ else:
 - **Foreground** → 1
 - **Background** → 0
 
-### 📘 Important Concepts (Week 1)
-
-#### 🔹 Semantic Segmentation
-
-Assigns a class label to every pixel in an image.
-
-#### 🔹 Instance Segmentation
-
-Separates individual object instances.
-
-- COCO supports instance segmentation.
-- This project reformulates it into binary semantic segmentation.
-
-#### 🔹 Ground Truth
-
-Annotated masks provided in dataset used for training and evaluation.
-
-#### 🔹 Lazy Mask Generation
-
-Masks are generated dynamically during training instead of being saved to disk.
-
-**Benefits:**
-
-- Saves storage
-- Efficient memory usage
-- Scalable design
-
 ---
 
-## 🧪 Week 2 – Data Preprocessing Pipeline
+## 🧪 Data Preprocessing Pipeline
 
 ### 🎯 Objective
 
@@ -252,7 +220,32 @@ Training requires randomness. Inference must remain stable and predictable.
 
 ---
 
-## 🧠 Research-Based Design Decisions
+## 📘 Key Concepts and Design Decisions
+
+### Semantic Segmentation
+
+Assigns a class label to every pixel in an image.
+
+### Instance Segmentation
+
+Separates individual object instances.
+
+- COCO supports instance segmentation.
+- This project reformulates it into binary semantic segmentation.
+
+### Ground Truth
+
+Annotated masks provided in dataset used for training and evaluation.
+
+### Lazy Mask Generation
+
+Masks are generated dynamically during training instead of being saved to disk.
+
+**Benefits:**
+
+- Saves storage
+- Efficient memory usage
+- Scalable design
 
 ### Why Binary Segmentation?
 
@@ -285,7 +278,7 @@ Training requires randomness. Inference must remain stable and predictable.
 
 ---
 
-## 🔜 Next Phase – Week 3
+## 🔜 Future Development
 
 - U-Net architecture
 - Custom Dataset class
@@ -296,10 +289,30 @@ Training requires randomness. Inference must remain stable and predictable.
 
 ---
 
-## 🎯 Conclusion
+## � Web Application
 
-Weeks 1 and 2 established the data foundation of the project.
+The project includes a web-based interface built with Flask for easy subject isolation from user-uploaded images.
 
-The system is now fully prepared for model development and training.
+### Features
+
+- Upload images via web interface
+- Automatic subject detection and mask generation
+- View results with overlaid masks
+- Download processed images
+
+### How to Run
+
+1. Navigate to the `codes/web_app/` directory
+2. Install dependencies: `pip install flask`
+3. Run the app: `python app.py`
+4. Open browser to `http://localhost:5000`
+
+The web app uses the trained model to perform real-time segmentation on uploaded images.
+
+---
+
+## �🎯 Conclusion
+
+The project has established a solid data foundation, including dataset preparation and a robust preprocessing pipeline. The system is now ready for model development and training to achieve subject isolation via image segmentation.
 
 
