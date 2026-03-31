@@ -2,4 +2,6 @@ data/annotations/instances_val2017.json
 data/val2017
 codes/__pycache__
 data/pre.jpg
-codes/web_app/
+codes/web_app/static
+codes/web_app/templates
+codes/web_app/uploads
