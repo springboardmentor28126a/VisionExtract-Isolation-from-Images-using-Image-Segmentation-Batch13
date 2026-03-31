@@ -1,33 +1,28 @@
 import cv2
 import numpy as np
 
-def preprocess_image_and_mask(image, mask, size=(256, 256)):
+
+def prepare_image(image, size=(256, 256)):
     """
-    Preprocess image and mask:
-    1. Resize
-    2. Normalize image
-    3. Ensure mask remains binary
+    Resize and normalize image for model input
     """
-
-    # Resize
-    image_resized = cv2.resize(image, size)
-    mask_resized = cv2.resize(mask, size, interpolation=cv2.INTER_NEAREST)
-
-    # Normalize image (0-255 -> 0-1)
-    image_normalized = image_resized / 255.0
-
-    return image_resized, image_normalized, mask_resized
+    image = cv2.resize(image, size)
+    image = image.astype(np.float32) / 255.0
+    return image
 
 
 def apply_mask(image, mask):
     """
-    Apply binary mask to image to create isolated output
+    Apply binary mask to extract subject
     """
 
-    # Convert mask to 3-channel
-    mask_3channel = np.stack([mask]*3, axis=-1)
+    # Ensure mask is binary
+    mask = (mask > 0.5).astype(np.uint8)
+
+    # Convert to 3-channel
+    mask = np.stack([mask] * 3, axis=-1)
 
     # Apply mask
-    isolated = image * mask_3channel
+    result = image * mask
 
-    return isolated
+    return result

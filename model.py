@@ -1,144 +1,52 @@
 import torch
 import torch.nn as nn
-import torch.optim as optim
-from torch.utils.data import DataLoader
 
-from dataset import SegmentationDataset
-from model import UNet
-from metrics import dice_score, iou_score
+class DoubleConv(nn.Module):
+    def __init__(self, in_channels, out_channels):
+        super().__init__()
+        self.conv = nn.Sequential(
+            nn.Conv2d(in_channels, out_channels, 3, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(out_channels, out_channels, 3, padding=1),
+            nn.ReLU()
+        )
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
+    def forward(self, x):
+        return self.conv(x)
 
-# -------------------------
-# Load datasets
-# -------------------------
 
-train_dataset = SegmentationDataset(
-    "data/train/images",
-    "data/train/masks"
-)
+class UNet(nn.Module):
+    def __init__(self):
+        super().__init__()
 
-val_dataset = SegmentationDataset(
-    "data/val/images",
-    "data/val/masks"
-)
+        self.down1 = DoubleConv(3, 64)
+        self.pool1 = nn.MaxPool2d(2)
 
-train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
-val_loader = DataLoader(val_dataset, batch_size=8, shuffle=False)
+        self.down2 = DoubleConv(64, 128)
+        self.pool2 = nn.MaxPool2d(2)
 
-# -------------------------
-# Model
-# -------------------------
+        self.bottleneck = DoubleConv(128, 256)
 
-model = UNet().to(device)
+        self.up1 = nn.ConvTranspose2d(256, 128, 2, stride=2)
+        self.conv1 = DoubleConv(256, 128)
 
-loss_fn = nn.BCEWithLogitsLoss()
+        self.up2 = nn.ConvTranspose2d(128, 64, 2, stride=2)
+        self.conv2 = DoubleConv(128, 64)
 
-optimizer = optim.Adam(model.parameters(), lr=0.0001)
+        self.final = nn.Conv2d(64, 1, 1)
 
-epochs = 10
+    def forward(self, x):
+        d1 = self.down1(x)
+        d2 = self.down2(self.pool1(d1))
 
-best_val_accuracy = 0
-best_epoch = 0
+        b = self.bottleneck(self.pool2(d2))
 
-# -------------------------
-# Training Loop
-# -------------------------
+        u1 = self.up1(b)
+        u1 = torch.cat([u1, d2], dim=1)
+        u1 = self.conv1(u1)
 
-for epoch in range(epochs):
+        u2 = self.up2(u1)
+        u2 = torch.cat([u2, d1], dim=1)
+        u2 = self.conv2(u2)
 
-    model.train()
-
-    train_loss = 0
-    train_accuracy = 0
-
-    for images, masks in train_loader:
-
-        images = images.to(device)
-        masks = masks.to(device)
-
-        preds = model(images)
-
-        loss = loss_fn(preds, masks)
-
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-        train_loss += loss.item()
-
-        preds = torch.sigmoid(preds)
-        preds = (preds > 0.5).float()
-
-        correct = (preds == masks).float().sum()
-        accuracy = correct / torch.numel(preds)
-
-        train_accuracy += accuracy.item()
-
-    train_loss = train_loss / len(train_loader)
-    train_accuracy = train_accuracy / len(train_loader)
-
-    # -------------------------
-    # Validation
-    # -------------------------
-
-    model.eval()
-
-    val_accuracy = 0
-    val_dice = 0
-    val_iou = 0
-
-    with torch.no_grad():
-
-        for images, masks in val_loader:
-
-            images = images.to(device)
-            masks = masks.to(device)
-
-            preds = model(images)
-
-            preds_bin = torch.sigmoid(preds)
-            preds_bin = (preds_bin > 0.5).float()
-
-            correct = (preds_bin == masks).float().sum()
-            accuracy = correct / torch.numel(preds_bin)
-
-            val_accuracy += accuracy.item()
-
-            val_dice += dice_score(preds, masks).item()
-            val_iou += iou_score(preds, masks).item()
-
-    val_accuracy = val_accuracy / len(val_loader)
-    val_dice = val_dice / len(val_loader)
-    val_iou = val_iou / len(val_loader)
-
-    # -------------------------
-    # Print results
-    # -------------------------
-
-    print(f"Epoch {epoch+1}/{epochs}")
-    print(f"Train Loss: {train_loss:.4f}")
-    print(f"Train Accuracy: {train_accuracy:.4f}")
-    print(f"Validation Accuracy: {val_accuracy:.4f}")
-    print(f"Validation Dice: {val_dice:.4f}")
-    print(f"Validation IoU: {val_iou:.4f}")
-    print("--------------------------------------------------")
-
-    # -------------------------
-    # Save best model
-    # -------------------------
-
-    if val_accuracy > best_val_accuracy:
-
-        best_val_accuracy = val_accuracy
-        best_epoch = epoch + 1
-
-        torch.save(model.state_dict(), "best_model.pth")
-
-# -------------------------
-# Training Complete
-# -------------------------
-
-print("Training Finished")
-print(f"Best Epoch: {best_epoch}")
-print(f"Best Validation Accuracy: {best_val_accuracy:.4f}")
+        return self.final(u2)

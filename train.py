@@ -4,8 +4,8 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 
 from dataset import SegmentationDataset
-from model import UNet
-from metrics import dice_score, iou_score
+from model import UNet              # ✅ U-NET
+from metrics import evaluate_all    # ✅ NEW METRICS
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -14,13 +14,13 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 # -------------------------
 
 train_dataset = SegmentationDataset(
-    "data/train/images",
-    "data/train/masks"
+    "dataset/train/images",
+    "dataset/train/masks"
 )
 
 val_dataset = SegmentationDataset(
-    "data/val/images",
-    "data/val/masks"
+    "dataset/val/images",
+    "dataset/val/masks"
 )
 
 train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
@@ -33,7 +33,6 @@ val_loader = DataLoader(val_dataset, batch_size=16, shuffle=False)
 model = UNet().to(device)
 
 loss_fn = nn.BCEWithLogitsLoss()
-
 optimizer = optim.Adam(model.parameters(), lr=0.0001)
 
 epochs = 15
@@ -67,16 +66,16 @@ for epoch in range(epochs):
 
         train_loss += loss.item()
 
-        preds = torch.sigmoid(preds)
-        preds = (preds > 0.5).float()
+        preds_bin = torch.sigmoid(preds)
+        preds_bin = (preds_bin > 0.5).float()
 
-        correct = (preds == masks).float().sum()
-        accuracy = correct / torch.numel(preds)
+        correct = (preds_bin == masks).float().sum()
+        accuracy = correct / torch.numel(preds_bin)
 
         train_accuracy += accuracy.item()
 
-    train_loss = train_loss / len(train_loader)
-    train_accuracy = train_accuracy / len(train_loader)
+    train_loss /= len(train_loader)
+    train_accuracy /= len(train_loader)
 
     # -------------------------
     # Validation
@@ -100,17 +99,23 @@ for epoch in range(epochs):
             preds_bin = torch.sigmoid(preds)
             preds_bin = (preds_bin > 0.5).float()
 
+            # Accuracy
             correct = (preds_bin == masks).float().sum()
             accuracy = correct / torch.numel(preds_bin)
-
             val_accuracy += accuracy.item()
 
-            val_dice += dice_score(preds, masks).item()
-            val_iou += iou_score(preds, masks).item()
+            # ✅ Convert to numpy for metrics
+            pred_np = preds_bin.cpu().numpy()
+            mask_np = masks.cpu().numpy()
 
-    val_accuracy = val_accuracy / len(val_loader)
-    val_dice = val_dice / len(val_loader)
-    val_iou = val_iou / len(val_loader)
+            metrics = evaluate_all(pred_np, mask_np)
+
+            val_dice += metrics["Dice"]
+            val_iou += metrics["IoU"]
+
+    val_accuracy /= len(val_loader)
+    val_dice /= len(val_loader)
+    val_iou /= len(val_loader)
 
     # -------------------------
     # Print results
@@ -129,10 +134,8 @@ for epoch in range(epochs):
     # -------------------------
 
     if val_accuracy > best_val_accuracy:
-
         best_val_accuracy = val_accuracy
         best_epoch = epoch + 1
-
         torch.save(model.state_dict(), "best_model.pth")
 
 # -------------------------
