@@ -29,7 +29,7 @@ The final system includes:
 
 ## Methodology
 
-### 🔹 Hybrid Model Approach
+### Hybrid Model Approach
 
 The project uses a **two-stage hybrid architecture**:
 
@@ -45,7 +45,7 @@ The project uses a **two-stage hybrid architecture**:
    * Refines boundaries at pixel level
    * Improves mask accuracy
 
-### 🔹 Pipeline Flow
+### Pipeline Flow
 
 ```
 Input Image
@@ -284,7 +284,7 @@ app.launch()
 
 ---
 
-## ▶Usage
+## Usage
 
 1. Upload an image
 2. Click "Process Image"
