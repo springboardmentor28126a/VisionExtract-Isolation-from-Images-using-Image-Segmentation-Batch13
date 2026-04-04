@@ -13,7 +13,7 @@
 
 ## Subject Isolation from Images using Deep Learning Segmentation
 
-VisionExtract is a computer vision project that performs binary semantic segmentation to isolate the main subject (person) from an image. It uses deep learning techniques to generate a segmentation mask and remove the background, producing a clean subject-focused output.
+VisionExtract is a computer vision project that performs binary semantic segmentation to isolate the main subject from an image. It uses deep learning techniques to generate a segmentation mask and remove the background, producing a clean subject-focused output.
 
 ---
 
